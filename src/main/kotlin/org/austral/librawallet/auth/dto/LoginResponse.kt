@@ -6,4 +6,4 @@ package org.austral.librawallet.auth.dto
  */
 data class LoginResponse(
     val token: String
-) 
+)

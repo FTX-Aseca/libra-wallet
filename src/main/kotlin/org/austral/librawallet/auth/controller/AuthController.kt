@@ -1,17 +1,17 @@
 package org.austral.librawallet.auth.controller
 
 import jakarta.validation.Valid
+import org.austral.librawallet.auth.dto.LoginRequest
+import org.austral.librawallet.auth.dto.LoginResponse
+import org.austral.librawallet.auth.dto.RegisterRequest
+import org.austral.librawallet.auth.dto.RegisterResponse
+import org.austral.librawallet.auth.service.AuthService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.austral.librawallet.auth.dto.RegisterRequest
-import org.austral.librawallet.auth.dto.RegisterResponse
-import org.austral.librawallet.auth.dto.LoginRequest
-import org.austral.librawallet.auth.dto.LoginResponse
-import org.austral.librawallet.auth.service.AuthService
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,7 +21,8 @@ class AuthController(
 
     @PostMapping("/register")
     fun register(
-        @Valid @RequestBody request: RegisterRequest
+        @Valid @RequestBody
+        request: RegisterRequest
     ): ResponseEntity<RegisterResponse> {
         val user = authService.register(request)
         val response = RegisterResponse(id = user.id!!, email = user.email)
@@ -30,9 +31,10 @@ class AuthController(
 
     @PostMapping("/login")
     fun login(
-        @Valid @RequestBody request: LoginRequest
+        @Valid @RequestBody
+        request: LoginRequest
     ): ResponseEntity<LoginResponse> {
         val token = authService.login(request)
         return ResponseEntity.ok(LoginResponse(token))
     }
-} 
+}

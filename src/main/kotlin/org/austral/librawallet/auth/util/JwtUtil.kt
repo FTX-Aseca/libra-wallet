@@ -2,10 +2,10 @@ package org.austral.librawallet.auth.util
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import org.austral.librawallet.auth.entity.User
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.Date
-import org.austral.librawallet.auth.entity.User
 
 @Component
 class JwtUtil(
@@ -27,4 +27,4 @@ class JwtUtil(
         val decodedJWT = verifier.verify(token)
         return decodedJWT.subject
     }
-} 
+}

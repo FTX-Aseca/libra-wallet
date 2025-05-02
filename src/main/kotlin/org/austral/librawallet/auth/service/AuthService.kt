@@ -1,14 +1,14 @@
 package org.austral.librawallet.auth.service
 
-import org.springframework.stereotype.Service
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.austral.librawallet.auth.dto.RegisterRequest
 import org.austral.librawallet.auth.dto.LoginRequest
+import org.austral.librawallet.auth.dto.RegisterRequest
 import org.austral.librawallet.auth.entity.User
-import org.austral.librawallet.auth.repository.UserRepository
-import org.austral.librawallet.auth.util.JwtUtil
 import org.austral.librawallet.auth.exception.ConflictException
 import org.austral.librawallet.auth.exception.UnauthorizedException
+import org.austral.librawallet.auth.repository.UserRepository
+import org.austral.librawallet.auth.util.JwtUtil
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
 
 @Service
 class AuthService(
@@ -34,4 +34,4 @@ class AuthService(
         }
         return jwtUtil.generateToken(user)
     }
-} 
+}

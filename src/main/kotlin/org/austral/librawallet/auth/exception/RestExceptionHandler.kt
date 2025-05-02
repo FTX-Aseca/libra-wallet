@@ -27,4 +27,4 @@ class RestExceptionHandler {
         val body = mapOf("errors" to errors)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body)
     }
-} 
+}

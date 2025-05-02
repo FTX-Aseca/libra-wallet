@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class LibraWalletApplication
 
 fun main(args: Array<String>) {
-	runApplication<LibraWalletApplication>(*args)
+    runApplication<LibraWalletApplication>(*args)
 }
