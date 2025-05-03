@@ -18,5 +18,5 @@ class User(
     var email: String,
 
     @Column(nullable = false)
-    var password: String
+    var password: String,
 )

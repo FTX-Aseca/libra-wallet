@@ -5,5 +5,5 @@ package org.austral.librawallet.auth.dto
  * @param token the JWT token for authenticated sessions
  */
 data class LoginResponse(
-    val token: String
+    val token: String,
 )

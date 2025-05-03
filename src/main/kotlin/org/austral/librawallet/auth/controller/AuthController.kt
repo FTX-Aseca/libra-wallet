@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
-    private val authService: AuthService
+    private val authService: AuthService,
 ) {
 
     @PostMapping("/register")
     fun register(
         @Valid @RequestBody
-        request: RegisterRequest
+        request: RegisterRequest,
     ): ResponseEntity<RegisterResponse> {
         val user = authService.register(request)
         val response = RegisterResponse(id = user.id!!, email = user.email)
@@ -32,7 +32,7 @@ class AuthController(
     @PostMapping("/login")
     fun login(
         @Valid @RequestBody
-        request: LoginRequest
+        request: LoginRequest,
     ): ResponseEntity<LoginResponse> {
         val token = authService.login(request)
         return ResponseEntity.ok(LoginResponse(token))

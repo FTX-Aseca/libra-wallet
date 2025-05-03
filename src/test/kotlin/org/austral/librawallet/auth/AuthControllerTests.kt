@@ -44,7 +44,7 @@ class AuthControllerTests {
         val result = mockMvc.perform(
             post(registerUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
+                .content(requestBody),
         )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").isNumber)
@@ -65,14 +65,14 @@ class AuthControllerTests {
         mockMvc.perform(
             post(registerUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
+                .content(body),
         ).andExpect(status().isCreated)
 
         // duplicate registration
         mockMvc.perform(
             post(registerUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
+                .content(body),
         )
             .andExpect(status().isConflict)
             .andExpect(jsonPath("$.error").value("Email already registered"))
@@ -84,7 +84,7 @@ class AuthControllerTests {
         mockMvc.perform(
             post(registerUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidEmail)
+                .content(invalidEmail),
         )
             .andExpect(status().isBadRequest)
     }
@@ -95,7 +95,7 @@ class AuthControllerTests {
         mockMvc.perform(
             post(registerUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(weakPassword)
+                .content(weakPassword),
         )
             .andExpect(status().isBadRequest)
     }
@@ -109,14 +109,14 @@ class AuthControllerTests {
         mockMvc.perform(
             post(registerUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
+                .content(body),
         ).andExpect(status().isCreated)
 
         // Then, log in, which should be successful
         mockMvc.perform(
             post(loginUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
+                .content(body),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.token").isString)
@@ -128,7 +128,7 @@ class AuthControllerTests {
         mockMvc.perform(
             post(loginUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
+                .content(body),
         )
             .andExpect(status().isUnauthorized)
     }

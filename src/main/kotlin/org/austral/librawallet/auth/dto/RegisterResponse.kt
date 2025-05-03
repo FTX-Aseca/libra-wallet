@@ -7,5 +7,5 @@ package org.austral.librawallet.auth.dto
  */
 data class RegisterResponse(
     val id: Long,
-    val email: String
+    val email: String,
 )

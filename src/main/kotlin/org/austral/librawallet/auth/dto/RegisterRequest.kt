@@ -13,5 +13,5 @@ data class RegisterRequest(
     @field:NotBlank(message = "Password is required")
     @field:Size(min = 8, message = "Password must be at least 8 characters")
     @field:Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W).+$", message = "Password must contain letters, numbers, and special characters")
-    val password: String
+    val password: String,
 )

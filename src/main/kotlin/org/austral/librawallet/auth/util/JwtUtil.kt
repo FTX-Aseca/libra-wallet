@@ -10,7 +10,7 @@ import java.util.Date
 @Component
 class JwtUtil(
     @Value("\${jwt.secret}") private val secret: String,
-    @Value("\${jwt.expirationMs}") private val expirationMs: Long
+    @Value("\${jwt.expirationMs}") private val expirationMs: Long,
 ) {
 
     fun generateToken(user: User): String {

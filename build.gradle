@@ -55,6 +55,17 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+ktlint {
+    version = "0.49.1"
+    debug = true
+    outputToConsole = true
+    ignoreFailures = false
+    filter {
+        exclude "**/generated/**"
+    }
+}
+
+
 jacoco {
     toolVersion = "0.8.10"
 }
@@ -84,3 +95,32 @@ tasks.jacocoTestCoverageVerification {
 }
 
 check.dependsOn jacocoTestReport, jacocoTestCoverageVerification
+
+tasks.register("addPreCommitGitHookOnBuild") {
+
+    doLast {
+        println "⚈ ⚈ ⚈ Installing Git pre‑commit hooks ⚈ ⚈ ⚈"
+        def sourceDir = file("hooks")
+        def targetDir = file(".git/hooks")
+
+        if (!sourceDir.exists()) {
+            println "⚠️  No hooks directory found at ${sourceDir.path}"
+            return
+        }
+        if (!targetDir.exists()) {
+            targetDir.mkdirs()
+        }
+
+        sourceDir.eachFile { hookFile ->
+            def dest = new File(targetDir, hookFile.name)
+            dest.text = hookFile.text                 // copy contents
+            dest.setExecutable(true, false)           // make sure it's executable
+            println "  • Installed hook: ${hookFile.name}"
+        }
+        println "✅ Git hooks installed!"
+    }
+}
+
+tasks.named("build") {
+    finalizedBy(tasks.named("addPreCommitGitHookOnBuild"))
+}
