@@ -7,3 +7,5 @@ if [ $STATUS -ne 0 ]; then
   echo "🚫 ktlintFormat failed. Aborting commit."
   exit $STATUS
 fi
+# Stage any formatting changes
+git add -A
