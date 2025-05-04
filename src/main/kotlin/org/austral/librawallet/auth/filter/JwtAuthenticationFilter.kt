@@ -43,7 +43,7 @@ class JwtAuthenticationFilter(
                 SecurityContextHolder.getContext().authentication = authentication
             }
         } catch (ex: Exception) {
-            //TODO check how to handle this Exception
+            // TODO check how to handle this Exception
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token")
             return
         }
