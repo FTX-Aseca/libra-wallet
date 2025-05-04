@@ -1,0 +1,9 @@
+#!/bin/sh
+
+
+echo "🔍 Running ktlintCheck, tests, and Jacoco report..."
+./gradlew ktlintCheck test jacocoTestReport
+if [ $? -ne 0 ]; then
+  echo "🚫 Code quality checks failed. Aborting push."
+  exit 1
+fi

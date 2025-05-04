@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo "⚙️ Formatting code with ktlintFormat..."
+./gradlew ktlintFormat
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+  echo "🚫 ktlintFormat failed. Aborting commit."
+  exit $STATUS
+fi
