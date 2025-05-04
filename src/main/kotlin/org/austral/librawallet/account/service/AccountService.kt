@@ -14,7 +14,7 @@ class AccountService(
         val account = accountRepository.findById(accountId)
             .orElseThrow { NotFoundException("Account not found") }
         if (account.user.id.toString() != userId) {
-            throw ForbiddenException() // Throw here instead of UnauthorizedException
+            throw ForbiddenException()
         }
         return centsToFormattedDouble(account.balance)
     }
