@@ -18,5 +18,4 @@ class AccountRestExceptionHandler {
         val body = mapOf("error" to (ex.message ?: "Forbidden"))
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body)
     }
-
 }

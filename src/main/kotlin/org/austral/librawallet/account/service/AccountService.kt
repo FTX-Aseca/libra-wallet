@@ -4,7 +4,6 @@ import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.util.centsToFormattedDouble
-import org.austral.librawallet.auth.exception.UnauthorizedException
 import org.springframework.stereotype.Service
 
 @Service
