@@ -24,7 +24,6 @@ class AccountController(
     ): ResponseEntity<BalanceResponse> {
         val token = authorization.removePrefix("Bearer ").trim()
         val userId = jwtUtil.validateTokenAndGetSubject(token)
-
         val balance = accountService.getBalance(accountId, userId)
         return ResponseEntity.ok(BalanceResponse(balance))
     }

@@ -12,4 +12,11 @@ class AccountRestExceptionHandler {
         val body = mapOf("error" to (ex.message ?: "Not found"))
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body)
     }
+
+    @ExceptionHandler(ForbiddenException::class)
+    fun handleForbidden(ex: ForbiddenException): ResponseEntity<Map<String, String>> {
+        val body = mapOf("error" to (ex.message ?: "Forbidden"))
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body)
+    }
+
 }

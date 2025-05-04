@@ -1,5 +1,6 @@
 package org.austral.librawallet.account.service
 
+import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.util.centsToFormattedDouble
@@ -13,11 +14,9 @@ class AccountService(
     fun getBalance(accountId: Long, userId: String): Double {
         val account = accountRepository.findById(accountId)
             .orElseThrow { NotFoundException("Account not found") }
-
         if (account.user.id.toString() != userId) {
-            throw UnauthorizedException("User not authorized to access this account")
+            throw ForbiddenException() // Throw here instead of UnauthorizedException
         }
-
         return centsToFormattedDouble(account.balance)
     }
 }

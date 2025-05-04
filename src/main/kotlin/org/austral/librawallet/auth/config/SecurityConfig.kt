@@ -1,10 +1,10 @@
 package org.austral.librawallet.auth.config
 
+import jakarta.servlet.http.HttpServletResponse
 import org.austral.librawallet.auth.filter.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -30,21 +30,25 @@ class SecurityConfig(
      */
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http {
-            csrf { disable() }
-
-            cors {}
-
-            sessionManagement {
-                sessionCreationPolicy = SessionCreationPolicy.STATELESS
+        http
+            .csrf { csrf -> csrf.disable() }
+            .cors {}
+            .sessionManagement { session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }
+            .authorizeHttpRequests { authz ->
+                authz
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .anyRequest().authenticated()
+            }
+            .exceptionHandling { exceptions ->
+                exceptions.authenticationEntryPoint { _, response, _ ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                }
             }
 
-            authorizeHttpRequests {
-                authorize("/api/auth/**", permitAll)
-                authorize(anyRequest, authenticated)
-            }
-        }
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+
         return http.build()
     }
 
