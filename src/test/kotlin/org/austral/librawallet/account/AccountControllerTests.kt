@@ -66,7 +66,7 @@ class AccountControllerTests {
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.balance").value("1234.56"))
+            .andExpect(jsonPath("$.balance").value(1234.56))
             .andReturn()
     }
 

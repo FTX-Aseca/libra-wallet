@@ -13,7 +13,12 @@ class AccountService(
     fun getBalance(accountId: Long, userId: String): Double {
         val account = accountRepository.findById(accountId)
             .orElseThrow { NotFoundException("Account not found") }
-        if (account.user.id.toString() != userId) {
+        val userIdLong = try {
+            userId.toLong()
+        } catch (e: NumberFormatException) {
+            throw ForbiddenException("Invalid user ID format")
+        }
+        if (account.user.id != userIdLong) {
             throw ForbiddenException()
         }
         return centsToFormattedDouble(account.balance)
