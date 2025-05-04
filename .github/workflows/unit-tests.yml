@@ -12,6 +12,10 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Execute Unit Tests
     runs-on: ubuntu-latest
+
+    env:
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
