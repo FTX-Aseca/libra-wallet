@@ -19,7 +19,7 @@ class AccountController(
     @GetMapping("/{accountId}/balance")
     fun getAccountBalance(
         @PathVariable accountId: Long,
-        @AuthenticationPrincipal jwt: Jwt
+        @AuthenticationPrincipal jwt: Jwt,
     ): ResponseEntity<BalanceResponse> {
         val balance = accountService.getBalance(accountId, jwt.subject)
         return ResponseEntity.ok(BalanceResponse(balance))
