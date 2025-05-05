@@ -1,5 +1,6 @@
 package org.austral.librawallet.auth.service
 
+import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.auth.dto.LoginRequest
 import org.austral.librawallet.auth.dto.RegisterRequest
 import org.austral.librawallet.auth.entity.User
@@ -23,6 +24,9 @@ class AuthService(
         }
         val hashed = passwordEncoder.encode(request.password)
         val user = User(email = request.email, password = hashed)
+        val account = Account(user = user, balance = 0L)
+        user.account = account
+
         return userRepository.save(user)
     }
 
