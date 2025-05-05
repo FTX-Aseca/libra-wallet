@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import org.austral.librawallet.auth.entity.User
 
+// TODO check if account and user are 1-1 relationship
 @Entity
 class Account(
     @Id

@@ -1,4 +1,4 @@
-package org.austral.librawallet.account.util
+package org.austral.librawallet.shared.formatters
 
 import java.math.BigDecimal
 import java.math.RoundingMode
