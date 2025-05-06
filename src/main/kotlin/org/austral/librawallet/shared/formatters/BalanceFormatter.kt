@@ -9,3 +9,9 @@ fun centsToFormattedDouble(balanceInCents: Long): Double {
         .setScale(2, RoundingMode.DOWN)
         .toDouble()
 }
+
+fun formattedDoubleToCents(balanceAsDouble: Double) =
+    BigDecimal.valueOf(balanceAsDouble)
+        .multiply(BigDecimal(100))
+        .setScale(0, RoundingMode.DOWN)
+        .longValueExact()

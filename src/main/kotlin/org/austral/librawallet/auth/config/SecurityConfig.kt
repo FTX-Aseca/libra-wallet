@@ -56,7 +56,7 @@ class SecurityConfig {
 
     @Bean
     fun jwtDecoder(
-        @Value("\${jwt.secret}") secret: String
+        @Value("\${jwt.secret}") secret: String,
     ): JwtDecoder {
         val keyBytes = secret.toByteArray()
         val secretKey = SecretKeySpec(keyBytes, "HmacSHA256")
