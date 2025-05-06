@@ -73,7 +73,6 @@ class TransferControllerTests {
 
         val requestBody = """
             {
-                "fromId": ${senderAccount.id},
                 "toIdentifier": "${receiverAccount.alias}",
                 "identifierType": "ALIAS",
                 "amount": $transferAmount
@@ -108,7 +107,6 @@ class TransferControllerTests {
 
         val requestBody = """
             {
-                "fromId": ${senderAccount.id},
                 "toIdentifier": "${receiverAccount.alias}",
                 "identifierType": "ALIAS",
                 "amount": $transferAmount
@@ -143,7 +141,6 @@ class TransferControllerTests {
 
         val requestBody = """
             {
-                "fromId": ${senderAccount.id},
                 "toIdentifier": "${receiverAccount.alias}",
                 "identifierType": "ALIAS",
                 "amount": $transferAmount
@@ -166,7 +163,6 @@ class TransferControllerTests {
             .andExpect(jsonPath("$[0].type").value("EXPENSE"))
             .andExpect(jsonPath("$[0].amount").value(transferAmount))
 
-        // check receiver transactions
         mockMvc.perform(
             get("/api/transactions")
                 .header("Authorization", receiverToken)
@@ -181,7 +177,6 @@ class TransferControllerTests {
     fun `AC4-1 unauthenticated request yields 401`() {
         val requestBody = """
             {
-                "fromId": 1,
                 "toIdentifier": "invalid",
                 "identifierType": "ALIAS",
                 "amount": 10.0
@@ -207,7 +202,6 @@ class TransferControllerTests {
 
         val requestBody = """
             {
-                "fromId": ${senderAccount.id},
                 "toIdentifier": "nonexistent",
                 "identifierType": "ALIAS",
                 "amount": $transferAmount
