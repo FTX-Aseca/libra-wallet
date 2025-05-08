@@ -175,11 +175,12 @@ class TransferControllerTests {
 
     @Test
     fun `AC4-1 unauthenticated request yields 401`() {
+        val amount = 10.0
         val requestBody = """
             {
                 "toIdentifier": "invalid",
                 "identifierType": "ALIAS",
-                "amount": 10.0
+                "amount": $amount
             }
         """.trimIndent()
 
