@@ -97,8 +97,8 @@ class TransferService(
     private fun getSenderAccountOrThrow(jwtUserId: String): Account {
         val userIdLong = jwtUserId.toLongOrNull()
             ?: throw ForbiddenException("Invalid user ID format")
-        val senderAccount = accountRepository.findById(userIdLong)
-            .orElseThrow { NotFoundException("Sender account not found") }
+        val senderAccount = accountRepository.findByUserId(userIdLong)
+            ?: throw NotFoundException("Sender account not found")
         return senderAccount
     }
 }

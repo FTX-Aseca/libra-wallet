@@ -2,7 +2,6 @@ name: CD
 
 on:
   push:
-  pull_request:
     branches:
       - main
       - dev
@@ -57,5 +56,93 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max 
- 
+          cache-to: type=gha,mode=max
+
+  release:
+    name: Create Release
+    needs: build-and-push
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/*.kts') }}
+
+      - name: Get version from build.gradle
+        id: get_version
+        run: |
+          VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Extract version components
+          VERSION_PARTS=(${VERSION//[.-]/ })
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor=$MINOR" >> $GITHUB_OUTPUT
+          echo "patch=$PATCH" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.ref_name == 'main' && format('Release v{0}', steps.get_version.outputs.version) || format('Dev Release v{0}-dev', steps.get_version.outputs.version) }}
+          tag_name: ${{ github.ref_name == 'main' && format('v{0}', steps.get_version.outputs.version) || format('v{0}-dev', steps.get_version.outputs.version) }}
+          draft: false
+          prerelease: ${{ github.ref_name == 'dev' }}
+          generate_release_notes: true
+
+      - name: Update version in build.gradle
+        if: github.ref_name == 'main'
+        run: |
+          # Calculate next version
+          NEXT_PATCH=$(( ${{ steps.get_version.outputs.patch }} + 1 ))
+          NEXT_VERSION="${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.$NEXT_PATCH-SNAPSHOT"
+          
+          # Update version in build.gradle using sed
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS requires an empty string for -i
+            sed -i '' "s/version = '.*'/version = '$NEXT_VERSION'/" build.gradle
+          else
+            # Linux
+            sed -i "s/version = '.*'/version = '$NEXT_VERSION'/" build.gradle
+          fi
+          
+          # Verify the change
+          echo "Updated version to: $NEXT_VERSION"
+          cat build.gradle | grep "version ="
+
+      - name: Create Pull Request
+        if: github.ref_name == 'main'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump version to $NEXT_VERSION"
+          title: "chore: bump version to $NEXT_VERSION"
+          body: |
+            This PR was automatically created to bump the version after release v${{ steps.get_version.outputs.version }}.
+            
+            Changes:
+            - Updated version in build.gradle from ${{ steps.get_version.outputs.version }} to $NEXT_VERSION
+          branch: version-bump
+          base: main 

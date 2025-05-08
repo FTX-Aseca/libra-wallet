@@ -102,10 +102,10 @@ tasks.jacocoTestCoverageVerification {
 
 check.dependsOn jacocoTestReport, jacocoTestCoverageVerification
 
-tasks.register("addPreCommitGitHookOnBuild") {
+tasks.register("addGitHookOnBuild") {
 
     doLast {
-        println "⚈ ⚈ ⚈ Installing Git pre‑commit hooks ⚈ ⚈ ⚈"
+        println "⚈ ⚈ ⚈ Installing Git hooks ⚈ ⚈ ⚈"
         def sourceDir = file("hooks")
         def targetDir = file(".git/hooks")
 
@@ -128,5 +128,5 @@ tasks.register("addPreCommitGitHookOnBuild") {
 }
 
 tasks.named("build") {
-    finalizedBy(tasks.named("addPreCommitGitHookOnBuild"))
+    finalizedBy(tasks.named("addGitHookOnBuild"))
 }

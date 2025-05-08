@@ -7,9 +7,12 @@ on:
       - dev
       - main
 
+env:
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
 jobs:
-  build_and_lint:
-    name: Build & Lint
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,8 +32,55 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/*.kts') }}
 
-      - name: Build (assemble, skip tests)
-        run: ./gradlew assemble -x test
+      - name: Build (assemble, exclude lint and tests)
+        run: ./gradlew assemble -x ktlintCheck -x ktlintTestSourceSetCheck -x test
 
-      - name: Run linter & formatting check (ktlint)
-        run: ./gradlew ktlintCheck
+  lint:
+    name: Lint
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/*.kts') }}
+
+      - name: Run linter & formatting check
+        run: ./gradlew ktlintCheck ktlintTestSourceSetCheck
+
+  test:
+    name: Unit Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/*.kts') }}
+
+      - name: Run unit tests
+        run: ./gradlew test
