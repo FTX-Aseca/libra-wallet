@@ -12,6 +12,7 @@ env:
   REGISTRY: ghcr.io
   # Set image name based on branch or release
   IMAGE_NAME: ${{ github.repository }}-${{ github.ref_name == 'main' && '' || 'dev' }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
 jobs:
   build-and-push:
