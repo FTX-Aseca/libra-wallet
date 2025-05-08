@@ -1,13 +1,11 @@
 name: CD
 
 on:
-  workflow_run:
-    workflows: ["CI"]
+  push:
+  pull_request:
     branches:
       - main
       - dev
-    types:
-      - completed
 
 env:
   REGISTRY: ghcr.io
@@ -19,7 +17,6 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       packages: write

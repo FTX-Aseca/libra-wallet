@@ -2,9 +2,11 @@ package org.austral.librawallet.account
 
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.repository.AccountRepository
+import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.entity.User
 import org.austral.librawallet.auth.repository.UserRepository
 import org.austral.librawallet.auth.util.JwtUtil
+import org.austral.librawallet.util.DatabaseInitializationService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +24,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class AccountControllerTests {
+
+    @Autowired
+    private lateinit var databaseInitializationService: DatabaseInitializationService
+
+    @Autowired
+    private lateinit var transactionRepository: TransactionRepository
 
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -42,8 +50,7 @@ class AccountControllerTests {
 
     @BeforeEach
     fun setup() {
-        accountRepository.deleteAll()
-        userRepository.deleteAll()
+        databaseInitializationService.clean()
     }
 
     private fun createUserAndToken(email: String, password: String): Pair<User, String> {
