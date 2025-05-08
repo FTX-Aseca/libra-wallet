@@ -92,7 +92,8 @@ class AccountControllerTests {
 
     @Test
     fun `AC3 unauthenticated request yields 401`() {
-        val user = userRepository.save(User(email = "user3@example.com", password = passwordEncoder.encode("Passw0rd3!")))
+        val user =
+            userRepository.save(User(email = "user3@example.com", password = passwordEncoder.encode("Passw0rd3!")))
 
         val account = accountRepository.save(Account(user = user, balance = 999L))
 
