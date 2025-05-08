@@ -61,7 +61,6 @@ jobs:
   release:
     name: Create Release
     needs: build-and-push
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
