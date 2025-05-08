@@ -7,6 +7,9 @@ on:
       - dev
       - main
 
+env:
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
 jobs:
   build:
     name: Build
@@ -61,9 +64,6 @@ jobs:
     name: Unit Tests
     needs: build
     runs-on: ubuntu-latest
-    env:
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
