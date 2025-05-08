@@ -38,4 +38,12 @@ class AuthService(
         }
         return jwtUtil.generateToken(user)
     }
+
+//    fun isJwtUserIdValid(jwtUserId: String): Boolean {
+//        val userIdLong = jwtUserId.toLongOrNull()
+//            ?: throw ForbiddenException("Invalid user ID format")
+//        if (senderAccount.user.id != userIdLong) {
+//            throw ForbiddenException()
+//        }
+//    }
 }

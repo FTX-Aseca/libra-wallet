@@ -1,5 +1,7 @@
 package org.austral.librawallet.account.service
 
+import org.austral.librawallet.account.dto.IdentifierType
+import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
@@ -21,5 +23,12 @@ class AccountService(
             throw ForbiddenException()
         }
         return centsToFormattedDouble(account.balance)
+    }
+
+    fun getAccountOrThrow(identifierType: IdentifierType, receiverIdentifier: String): Account {
+        return when (identifierType) {
+            IdentifierType.ALIAS -> accountRepository.findByAlias(receiverIdentifier)
+            IdentifierType.CVU -> accountRepository.findByCvu(receiverIdentifier)
+        } ?: throw NotFoundException("Recipient account not found")
     }
 }
