@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Set the commit message template directly
+git config --local commit.template "$(cat << 'EOF'
+# Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build
+# Scopes: api, auth, wallet, ui, config, docker, ci, docs
+# Example: feat(auth): add JWT authentication
+<type>(<scope>): <short description>
+
+# Provide a more detailed description if needed
+<optional detailed description>
+
+# Only include if there are breaking changes
+BREAKING CHANGE: <description of breaking change, if any>
+# Reference issues using #issue_number
+Fixes: <issue reference, e.g., #123>
+EOF
+)" 
