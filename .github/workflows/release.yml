@@ -1,14 +1,13 @@
 name: Release
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Unit Tests"]
     branches:
       - main
       - dev
-    paths-ignore:
-      - 'CHANGELOG.md'
-      - '.github/workflows/release.yml'
-      - '.github/release.yml'
+    types:
+      - completed
 
 env:
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -17,6 +16,7 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
       packages: write
@@ -60,13 +60,14 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release v${{ steps.get_version.outputs.version }}
-          tag_name: v${{ steps.get_version.outputs.version }}
+          name: ${{ github.ref_name == 'main' && format('Release v{0}', steps.get_version.outputs.version) || format('Dev Release v{0}-dev', steps.get_version.outputs.version) }}
+          tag_name: ${{ github.ref_name == 'main' && format('v{0}', steps.get_version.outputs.version) || format('v{0}-dev', steps.get_version.outputs.version) }}
           draft: false
-          prerelease: false
+          prerelease: ${{ github.ref_name == 'dev' }}
           generate_release_notes: true
 
       - name: Update version in build.gradle
+        if: github.ref_name == 'main'
         run: |
           # Calculate next version
           NEXT_PATCH=$(( ${{ steps.get_version.outputs.patch }} + 1 ))
@@ -86,6 +87,7 @@ jobs:
           cat build.gradle | grep "version ="
 
       - name: Create Pull Request
+        if: github.ref_name == 'main'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

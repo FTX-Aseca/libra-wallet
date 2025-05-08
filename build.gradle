@@ -65,6 +65,18 @@ ktlint {
     filter {
         exclude "**/generated/**"
     }
+    verbose = true
+    android = false
+    coloredOutput = true
+    reporters {
+        reporter "plain"
+        reporter "checkstyle"
+        reporter "html"
+    }
+    kotlinScriptAdditionalPaths {
+        include fileTree("scripts/")
+    }
+    includeTests = true
 }
 
 
