@@ -87,19 +87,10 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/*.kts') }}
 
-      - name: Get version from build.gradle
-        id: get_version
+      - name: Set Version
         run: |
-          VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          # Extract version components
-          VERSION_PARTS=(${VERSION//[.-]/ })
-          MAJOR=${VERSION_PARTS[0]}
-          MINOR=${VERSION_PARTS[1]}
-          PATCH=${VERSION_PARTS[2]}
-          echo "major=$MAJOR" >> $GITHUB_OUTPUT
-          echo "minor=$MINOR" >> $GITHUB_OUTPUT
-          echo "patch=$PATCH" >> $GITHUB_OUTPUT
+          VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}' | tr -d '\n')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
