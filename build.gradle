@@ -67,6 +67,10 @@ ktlint {
     }
 }
 
+tasks.named('ktlintFormat') {
+    dependsOn 'ktlintTestSourceSetFormat'
+}
+
 
 jacoco {
     toolVersion = "0.8.10"
