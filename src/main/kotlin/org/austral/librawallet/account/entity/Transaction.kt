@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.PrePersist
+import java.time.LocalDateTime
 
 @Entity
 class Transaction(
@@ -28,4 +30,14 @@ class Transaction(
 
     // amount in cents
     val amount: Long,
-)
+
+    var timestamp: LocalDateTime? = null,
+
+    // optional description of the transaction
+    val description: String? = null,
+) {
+    @PrePersist
+    fun onCreate() {
+        timestamp = LocalDateTime.now()
+    }
+}

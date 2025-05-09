@@ -90,6 +90,8 @@ class TransferService(
             TransactionResponse(
                 type = tx.type,
                 amount = centsToFormattedDouble(tx.amount),
+                timestamp = tx.timestamp,
+                description = tx.description,
             )
         }
     }
