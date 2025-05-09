@@ -43,4 +43,4 @@ class AccountTransactionController(
         val transaction = accountTransactionService.createTransaction(accountId, request, jwtUserId)
         return ResponseEntity.status(HttpStatus.CREATED).body(transaction)
     }
-} 
+}

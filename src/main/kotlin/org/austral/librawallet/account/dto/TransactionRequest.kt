@@ -9,4 +9,4 @@ data class TransactionRequest(
     val type: TransactionType,
     val amount: Double,
     val description: String? = null,
-) 
+)
