@@ -3,6 +3,7 @@ package org.austral.librawallet.account.service
 import org.austral.librawallet.account.dto.TransactionRequest
 import org.austral.librawallet.account.dto.TransactionResponse
 import org.austral.librawallet.account.entity.Transaction
+import org.austral.librawallet.account.entity.TransactionType
 import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
@@ -20,15 +21,8 @@ class AccountTransactionService(
 ) {
 
     fun getAccountTransactions(accountId: Long, jwtUserId: String): List<TransactionResponse> {
-        val userIdLong = jwtUserId.toLongOrNull()
-            ?: throw ForbiddenException("Invalid user ID format")
+        validateAccount(accountId, jwtUserId)
 
-        val account = accountRepository.findById(accountId).orElse(null)
-            ?: throw NotFoundException("Account not found")
-
-        if (account.user.id != userIdLong) {
-            throw ForbiddenException("Account does not belong to authenticated user")
-        }
         val transactions = transactionRepository.findByAccountIdOrderByTimestampDesc(accountId)
         return transactions.map { tx ->
             TransactionResponse(
@@ -42,14 +36,7 @@ class AccountTransactionService(
 
     @Transactional
     fun createTransaction(accountId: Long, request: TransactionRequest, jwtUserId: String): TransactionResponse {
-        val userIdLong = jwtUserId.toLongOrNull()
-            ?: throw ForbiddenException("Invalid user ID format")
-        val account = accountRepository.findById(accountId).orElse(null)
-            ?: throw NotFoundException("Account not found")
-
-        if (account.user.id != userIdLong) {
-            throw ForbiddenException("Account does not belong to authenticated user")
-        }
+        val account = validateAccount(accountId, jwtUserId)
 
         val amountInCents = formattedDoubleToCents(request.amount)
 
@@ -58,8 +45,8 @@ class AccountTransactionService(
         }
 
         when (request.type) {
-            org.austral.librawallet.account.entity.TransactionType.INCOME -> account.balance += amountInCents
-            org.austral.librawallet.account.entity.TransactionType.EXPENSE -> account.balance -= amountInCents
+            TransactionType.INCOME -> account.balance += amountInCents
+            TransactionType.EXPENSE -> account.balance -= amountInCents
         }
         accountRepository.save(account)
 
@@ -79,4 +66,13 @@ class AccountTransactionService(
             description = savedTransaction.description,
         )
     }
+
+    private fun validateAccount(accountId: Long, jwtUserId: String) =
+        jwtUserId.toLongOrNull()?.let { userIdLong ->
+            accountRepository.findById(accountId).orElse(null)?.also { account ->
+                if (account.user.id != userIdLong) {
+                    throw ForbiddenException("Account does not belong to authenticated user")
+                }
+            } ?: throw NotFoundException("Account not found")
+        } ?: throw ForbiddenException("Invalid user ID format")
 }

@@ -5,10 +5,11 @@ import org.austral.librawallet.account.entity.Transaction
 import org.austral.librawallet.account.entity.TransactionType
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
-import org.austral.librawallet.auth.entity.User
 import org.austral.librawallet.auth.repository.UserRepository
 import org.austral.librawallet.auth.util.JwtUtil
+import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
+import org.austral.librawallet.util.UserTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.time.LocalDateTime
+import kotlin.test.assertEquals
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -50,6 +51,9 @@ class AccountTransactionControllerTests {
     @Autowired
     lateinit var jwtUtils: JwtUtil
 
+    @Autowired
+    lateinit var userTestUtils: UserTestUtils
+
     private val transactionsUrl = "/api/accounts/{accountId}/transactions"
 
     @BeforeEach
@@ -57,46 +61,29 @@ class AccountTransactionControllerTests {
         databaseInitializationService.clean()
     }
 
-    private fun createUserAndToken(email: String, password: String): Pair<User, String> {
-        val hashed = passwordEncoder.encode(password)
-        val user = userRepository.save(User(email = email, password = hashed))
-        val token = "Bearer ${jwtUtils.generateToken(user)}"
-        return user to token
-    }
-
-    private fun createTransactions(account: Account, otherAccount: Account) {
-        val income = Transaction(
+    private fun createTransactions(account: Account, type: TransactionType, amount: Double) {
+        val transaction = Transaction(
             account = account,
-            otherAccount = otherAccount,
-            type = TransactionType.INCOME,
-            amount = 5000L, // $50.00
-            timestamp = LocalDateTime.now().minusDays(1),
+            otherAccount = account,
+            type = type,
+            amount = formattedDoubleToCents(amount),
         )
-
-        val expense = Transaction(
-            account = account,
-            otherAccount = otherAccount,
-            type = TransactionType.EXPENSE,
-            amount = 2500L, // $25.00
-            timestamp = LocalDateTime.now(),
-        )
-
-        transactionRepository.save(income)
-        transactionRepository.save(expense)
+        transactionRepository.save(transaction)
     }
 
     @Test
     fun `AC1-1 POST with valid payload returns HTTP 201 and persisted transaction JSON for income`() {
         val initialBalance = 100.00
         val depositAmount = 50.00
-        val (user, jwt) = createUserAndToken("user5@example.com", "Passw0rd!")
-        val account = accountRepository.save(Account(user = user, balance = (initialBalance * 100).toLong()))
+        val description = "Deposit"
+        val (user, jwt) = userTestUtils.createUserAndToken("user5@example.com", "Passw0rd!")
+        val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
         val requestBody = """
             {
                 "type": "INCOME",
                 "amount": $depositAmount,
-                "description": "Deposit"
+                "description": "$description"
             }
         """.trimIndent()
 
@@ -113,21 +100,26 @@ class AccountTransactionControllerTests {
 
         // Verify account balance was updated
         val updatedAccount = accountRepository.findById(account.id!!).get()
-        assert(updatedAccount.balance == ((initialBalance + depositAmount) * 100).toLong())
+        assertEquals(
+            formattedDoubleToCents(initialBalance + depositAmount),
+            updatedAccount.balance,
+            "Account balance should be updated after deposit",
+        )
     }
 
     @Test
     fun `AC1-2 POST with valid payload returns HTTP 201 and persisted transaction JSON for expense`() {
         val initialBalance = 100.00
         val withdrawalAmount = 30.00
-        val (user, jwt) = createUserAndToken("user6@example.com", "Passw0rd!")
-        val account = accountRepository.save(Account(user = user, balance = (initialBalance * 100).toLong()))
+        val description = "Withdrawal"
+        val (user, jwt) = userTestUtils.createUserAndToken("user6@example.com", "Passw0rd!")
+        val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
         val requestBody = """
             {
                 "type": "EXPENSE",
                 "amount": $withdrawalAmount,
-                "description": "Withdrawal"
+                "description": "$description"
             }
         """.trimIndent()
 
@@ -144,13 +136,17 @@ class AccountTransactionControllerTests {
 
         // Verify account balance was updated
         val updatedAccount = accountRepository.findById(account.id!!).get()
-        assert(updatedAccount.balance == ((initialBalance - withdrawalAmount) * 100).toLong())
+        assertEquals(
+            formattedDoubleToCents(initialBalance - withdrawalAmount),
+            updatedAccount.balance,
+            "Account balance should be reduced after withdrawal",
+        )
     }
 
     @Test
     fun `AC2-1 account with no transactions returns empty array`() {
-        val (user, jwt) = createUserAndToken("user4@example.com", "Passw0rd!")
-        val account = accountRepository.save(Account(user = user, balance = 1000L))
+        val (user, jwt) = userTestUtils.createUserAndToken("user4@example.com", "Passw0rd!")
+        val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(10.00)))
 
         mockMvc.perform(
             get(transactionsUrl, account.id!!)
@@ -164,13 +160,14 @@ class AccountTransactionControllerTests {
 
     @Test
     fun `AC2-2 GET returns a JSON array of transactions sorted descending by timestamp`() {
-        val (user, jwt) = createUserAndToken("user1@example.com", "Passw0rd!")
-        val (otherUser, _) = createUserAndToken("other@example.com", "Passw0rd!")
+        val (user, jwt) = userTestUtils.createUserAndToken("user1@example.com", "Passw0rd!")
+        val accountBalance = 100.00
+        val expenseAmount = 25.00 // in $ since it is received in the json response
+        val incomeAmount = 50.00 // same as above
+        val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(accountBalance)))
 
-        val account = accountRepository.save(Account(user = user, balance = 10000L))
-        val otherAccount = accountRepository.save(Account(user = otherUser, balance = 5000L))
-
-        createTransactions(account, otherAccount)
+        createTransactions(account, TransactionType.EXPENSE, expenseAmount)
+        createTransactions(account, TransactionType.INCOME, incomeAmount)
 
         mockMvc.perform(
             get(transactionsUrl, account.id!!)
@@ -178,18 +175,18 @@ class AccountTransactionControllerTests {
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$[0].type").value("EXPENSE")) // Most recent should be first
-            .andExpect(jsonPath("$[0].amount").value(25.00))
+            .andExpect(jsonPath("$[0].type").value("INCOME")) // Most recent should be first
+            .andExpect(jsonPath("$[0].amount").value(incomeAmount))
             .andExpect(jsonPath("$[0].timestamp").exists())
-            .andExpect(jsonPath("$[1].type").value("INCOME"))
-            .andExpect(jsonPath("$[1].amount").value(50.00))
+            .andExpect(jsonPath("$[1].type").value("EXPENSE"))
+            .andExpect(jsonPath("$[1].amount").value(expenseAmount))
             .andExpect(jsonPath("$[1].timestamp").exists())
     }
 
     @Test
     fun `AC3-1 unauthenticated requests return HTTP 401`() {
-        val (user, _) = createUserAndToken("user2@example.com", "Passw0rd!")
-        val account = accountRepository.save(Account(user = user, balance = 5000L))
+        val (user, _) = userTestUtils.createUserAndToken("user2@example.com", "Passw0rd!")
+        val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(50.00)))
 
         mockMvc.perform(
             get(transactionsUrl, account.id!!),
@@ -198,11 +195,11 @@ class AccountTransactionControllerTests {
 
     @Test
     fun `AC3-2 requests by non-owners return HTTP 403`() {
-        val (owner, _) = createUserAndToken("owner@example.com", "OwnerPass1!")
-        val (intruder, intruderJwt) = createUserAndToken("intruder@example.com", "IntruderPass2!")
+        val (owner, _) = userTestUtils.createUserAndToken("owner@example.com", "OwnerPass1!")
+        val (intruder, intruderJwt) = userTestUtils.createUserAndToken("intruder@example.com", "IntruderPass2!")
 
-        val ownerAccount = accountRepository.save(Account(user = owner, balance = 2000L))
-        val intruderAccount = accountRepository.save(Account(user = intruder, balance = 2000L))
+        val ownerAccount = accountRepository.save(Account(user = owner, balance = formattedDoubleToCents(20.00)))
+        val intruderAccount = accountRepository.save(Account(user = intruder, balance = formattedDoubleToCents(20.00)))
 
         mockMvc.perform(
             get(transactionsUrl, ownerAccount.id!!)
@@ -212,7 +209,7 @@ class AccountTransactionControllerTests {
 
     @Test
     fun `AC4 non-existent accountId returns HTTP 404`() {
-        val (user, jwt) = createUserAndToken("user3@example.com", "Passw0rd!")
+        val (user, jwt) = userTestUtils.createUserAndToken("user3@example.com", "Passw0rd!")
         val nonexistentId = 9999999L
 
         mockMvc.perform(
@@ -223,18 +220,21 @@ class AccountTransactionControllerTests {
             .andExpect(jsonPath("$.error").exists())
     }
 
+    // AC5 is for response time (skipped)
+
     @Test
-    fun `AC6 expense transaction with insufficient funds returns 409`() { // AC5 is for response time (skipped)
+    fun `AC6 expense transaction with insufficient funds returns 409`() {
         val initialBalance = 20.00
         val withdrawalAmount = 50.00 // More than balance
-        val (user, jwt) = createUserAndToken("user7@example.com", "Passw0rd!")
-        val account = accountRepository.save(Account(user = user, balance = (initialBalance * 100).toLong()))
+        val description = "Too Large Withdrawal"
+        val (user, jwt) = userTestUtils.createUserAndToken("user7@example.com", "Passw0rd!")
+        val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
         val requestBody = """
             {
                 "type": "EXPENSE",
                 "amount": $withdrawalAmount,
-                "description": "Too Large Withdrawal"
+                "description": "$description"
             }
         """.trimIndent()
 
@@ -248,6 +248,10 @@ class AccountTransactionControllerTests {
             .andExpect(jsonPath("$.error").exists())
 
         val updatedAccount = accountRepository.findById(account.id!!).get()
-        assert(updatedAccount.balance == (initialBalance * 100).toLong())
+        assertEquals(
+            formattedDoubleToCents(initialBalance),
+            updatedAccount.balance,
+            "Account balance should not change after failed transaction",
+        )
     }
 }

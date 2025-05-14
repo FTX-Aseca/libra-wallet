@@ -7,6 +7,7 @@ import org.austral.librawallet.auth.entity.User
 import org.austral.librawallet.auth.repository.UserRepository
 import org.austral.librawallet.auth.util.JwtUtil
 import org.austral.librawallet.util.DatabaseInitializationService
+import org.austral.librawallet.util.UserTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,6 +47,9 @@ class AccountControllerTests {
     @Autowired
     lateinit var jwtUtils: JwtUtil
 
+    @Autowired
+    lateinit var userTestUtils: UserTestUtils
+
     private val balanceUrl = "/api/accounts/{accountId}/balance"
 
     @BeforeEach
@@ -53,16 +57,9 @@ class AccountControllerTests {
         databaseInitializationService.clean()
     }
 
-    private fun createUserAndToken(email: String, password: String): Pair<User, String> {
-        val hashed = passwordEncoder.encode(password)
-        val user = userRepository.save(User(email = email, password = hashed))
-        val token = "Bearer ${jwtUtils.generateToken(user)}"
-        return user to token
-    }
-
     @Test
     fun `AC1 authenticated user gets 200 and balance JSON`() {
-        val (user, jwt) = createUserAndToken("user1@example.com", "Passw0rd!")
+        val (user, jwt) = userTestUtils.createUserAndToken("user1@example.com", "Passw0rd!")
         val balance = 1234.56
         val balanceInCents: Long = (balance * 100).toLong()
         val account = accountRepository.save(Account(user = user, balance = balanceInCents))
@@ -79,7 +76,7 @@ class AccountControllerTests {
 
     @Test
     fun `AC2 balance formatted as non-negative double with two decimals`() {
-        val (user, jwt) = createUserAndToken("user2@example.com", "Passw0rd2!")
+        val (user, jwt) = userTestUtils.createUserAndToken("user2@example.com", "Passw0rd2!")
         val account = accountRepository.save(Account(user = user, balance = (10.5 * 100).toLong()))
 
         mockMvc.perform(
@@ -104,8 +101,8 @@ class AccountControllerTests {
 
     @Test
     fun `AC4 user who does not own the account gets 403`() {
-        val (owner, ownerJwt) = createUserAndToken("owner@example.com", "OwnerPass1!")
-        val (intruder, intruderJwt) = createUserAndToken("intruder@example.com", "IntruderPass2!")
+        val (owner, ownerJwt) = userTestUtils.createUserAndToken("owner@example.com", "OwnerPass1!")
+        val (intruder, intruderJwt) = userTestUtils.createUserAndToken("intruder@example.com", "IntruderPass2!")
         val account = accountRepository.save(Account(user = owner, balance = 2000L))
 
         mockMvc.perform(
@@ -116,7 +113,7 @@ class AccountControllerTests {
 
     @Test
     fun `AC5 non-existent accountId gives 404`() {
-        val (user, jwt) = createUserAndToken("user5@example.com", "Passw0rd5!")
+        val (user, jwt) = userTestUtils.createUserAndToken("user5@example.com", "Passw0rd5!")
         val nonexistentId = 9999999L
 
         mockMvc.perform(
