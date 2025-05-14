@@ -2,10 +2,10 @@ package org.austral.librawallet.account
 
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.repository.AccountRepository
-import org.austral.librawallet.auth.entity.User
 import org.austral.librawallet.auth.repository.UserRepository
 import org.austral.librawallet.auth.util.JwtUtil
 import org.austral.librawallet.util.DatabaseInitializationService
+import org.austral.librawallet.util.UserTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,16 +43,12 @@ class TransferControllerTests {
     @Autowired
     lateinit var jwtUtils: JwtUtil
 
+    @Autowired
+    lateinit var userTestUtils: UserTestUtils
+
     @BeforeEach
     fun setup() {
         databaseInitializationService.clean()
-    }
-
-    private fun createUserAndToken(email: String, password: String): Pair<User, String> {
-        val hashed = passwordEncoder.encode(password)
-        val user = userRepository.save(User(email = email, password = hashed))
-        val token = "Bearer ${jwtUtils.generateToken(user)}"
-        return user to token
     }
 
     @Test
@@ -61,8 +57,8 @@ class TransferControllerTests {
         val initialSenderBalance = 100.00
         val initialReceiverBalance = 50.00
 
-        val (sender, senderToken) = createUserAndToken("sender@example.com", "Pass1!")
-        val (receiver, _) = createUserAndToken("receiver@example.com", "Pass2!")
+        val (sender, senderToken) = userTestUtils.createUserAndToken("sender@example.com", "Pass1!")
+        val (receiver, _) = userTestUtils.createUserAndToken("receiver@example.com", "Pass2!")
 
         val senderAccount = accountRepository.save(
             Account(user = sender, balance = (initialSenderBalance * 100).toLong()),
@@ -95,8 +91,8 @@ class TransferControllerTests {
         val transferAmount = 20.00
         val initialSenderBalance = 10.00
 
-        val (sender, senderToken) = createUserAndToken("sender2@example.com", "Pass3!")
-        val (receiver, _) = createUserAndToken("receiver2@example.com", "Pass4!")
+        val (sender, senderToken) = userTestUtils.createUserAndToken("sender2@example.com", "Pass3!")
+        val (receiver, _) = userTestUtils.createUserAndToken("receiver2@example.com", "Pass4!")
 
         val senderAccount = accountRepository.save(
             Account(user = sender, balance = (initialSenderBalance * 100).toLong()),
@@ -129,8 +125,8 @@ class TransferControllerTests {
         val initialSenderBalance = 100.00
         val initialReceiverBalance = 50.00
 
-        val (sender, senderToken) = createUserAndToken("sender3@example.com", "Pass5!")
-        val (receiver, receiverToken) = createUserAndToken("receiver3@example.com", "Pass6!")
+        val (sender, senderToken) = userTestUtils.createUserAndToken("sender3@example.com", "Pass5!")
+        val (receiver, receiverToken) = userTestUtils.createUserAndToken("receiver3@example.com", "Pass6!")
 
         val senderAccount = accountRepository.save(
             Account(user = sender, balance = (initialSenderBalance * 100).toLong()),
@@ -195,7 +191,7 @@ class TransferControllerTests {
     @Test
     fun `AC4-2 invalid receiver yields 404`() {
         val transferAmount = 10.0
-        val (sender, senderToken) = createUserAndToken("sender4@example.com", "Pass7!")
+        val (sender, senderToken) = userTestUtils.createUserAndToken("sender4@example.com", "Pass7!")
 
         val senderAccount = accountRepository.save(
             Account(user = sender, balance = (transferAmount * 100).toLong()),

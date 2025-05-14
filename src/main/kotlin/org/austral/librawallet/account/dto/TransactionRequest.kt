@@ -1,14 +1,12 @@
 package org.austral.librawallet.account.dto
 
 import org.austral.librawallet.account.entity.TransactionType
-import java.time.LocalDateTime
 
 /**
- * Response for a transaction history entry with type and formatted amount.
+ * Request to create a direct transaction on an account.
  */
-data class TransactionResponse(
+data class TransactionRequest(
     val type: TransactionType,
     val amount: Double,
-    val timestamp: LocalDateTime?,
     val description: String? = null,
 )
