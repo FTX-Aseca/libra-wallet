@@ -8,7 +8,6 @@ object ErrorMessages {
     const val SENDER_ACCOUNT_NOT_FOUND = "Sender account not found"
     const val INVALID_USER_ID_FORMAT = "Invalid user ID format"
     const val RECIPIENT_ACCOUNT_NOT_FOUND = "Recipient account not found"
-    const val INVALID_SIGNATURE = "Invalid signature"
     const val INVALID_CALLBACK_REQUEST = "Invalid callback request"
     const val ACCOUNT_DOES_NOT_BELONG = "Account does not belong to authenticated user"
 }

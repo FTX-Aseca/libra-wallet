@@ -45,10 +45,7 @@ class DebinService(
     }
 
     @Transactional
-    fun handleCallback(callback: DebinCallbackRequest, signature: String?): DebinResponse {
-        if (signature != "valid-signature") {
-            throw BadRequestException(ErrorMessages.INVALID_SIGNATURE)
-        }
+    fun handleCallback(callback: DebinCallbackRequest): DebinResponse {
         val debin = debinRequestRepository.findById(callback.id)
             .orElseThrow { BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST) }
         if (debin.status != DebinStatus.PENDING) {

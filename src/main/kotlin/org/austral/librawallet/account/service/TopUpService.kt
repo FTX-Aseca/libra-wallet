@@ -45,10 +45,7 @@ class TopUpService(
     }
 
     @Transactional
-    fun handleCallback(callback: TopUpCallbackRequest, signature: String?): TopUpResponse {
-        if (signature != "valid-signature") {
-            throw BadRequestException(ErrorMessages.INVALID_SIGNATURE)
-        }
+    fun handleCallback(callback: TopUpCallbackRequest): TopUpResponse {
         val order = topUpOrderRepository.findById(callback.id)
             .orElseThrow { BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST) }
         if (order.status != TopUpStatus.PENDING) {

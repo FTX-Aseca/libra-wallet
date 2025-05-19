@@ -1,13 +1,9 @@
 package org.austral.librawallet.account
 
-import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.DebinRequest
 import org.austral.librawallet.account.entity.DebinStatus
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.DebinRequestRepository
-import org.austral.librawallet.auth.entity.User
-import org.austral.librawallet.auth.repository.UserRepository
-import org.austral.librawallet.auth.util.JwtUtil
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
@@ -18,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -38,19 +33,10 @@ class DebinControllerIntegrationTest {
     private lateinit var databaseInitializationService: DatabaseInitializationService
 
     @Autowired
-    private lateinit var userRepository: UserRepository
-
-    @Autowired
     private lateinit var accountRepository: AccountRepository
 
     @Autowired
     private lateinit var debinRequestRepository: DebinRequestRepository
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
-
-    @Autowired
-    private lateinit var jwtUtils: JwtUtil
 
     @Autowired
     private lateinit var userTestUtils: UserTestUtils
@@ -60,15 +46,9 @@ class DebinControllerIntegrationTest {
         databaseInitializationService.clean()
     }
 
-    private fun createSetupData(email: String, password: String): Triple<User, Account, String> {
-        val (user, token) = userTestUtils.createUserAndToken(email, password)
-        val account = accountRepository.save(Account(user = user, balance = 0L))
-        return Triple(user, account, token)
-    }
-
     @Test
     fun `AC2 DEBIN request returns 201 with order details`() {
-        val (_, _, token) = createSetupData("user1@example.com", "Pass1!")
+        val (_, _, token) = userTestUtils.createSetupData("user1@example.com", "Pass1!")
         val amount = 75.50
         val requestBody = """{ "amount": $amount }"""
 
@@ -85,7 +65,7 @@ class DebinControllerIntegrationTest {
 
     @Test
     fun `AC3 DEBIN callback valid transitions to COMPLETED and credits user`() {
-        val (_, account, token) = createSetupData("user2@example.com", "Pass2!")
+        val (_, account, token) = userTestUtils.createSetupData("user2@example.com", "Pass2!")
         val amount = 50.0
         // create DEBIN request via service or repository
         val debin = debinRequestRepository.save(
@@ -123,9 +103,9 @@ class DebinControllerIntegrationTest {
 
     @Test
     fun `AC5 invalid callback returns 400`() {
-        val (_, account, token) = createSetupData("user3@example.com", "Pass3!")
+        val (_, account, token) = userTestUtils.createSetupData("user3@example.com", "Pass3!")
         val amount = 25.0
-        val debin = debinRequestRepository.save(
+        debinRequestRepository.save(
             DebinRequest(
                 account = account,
                 amount = formattedDoubleToCents(amount),
@@ -134,17 +114,16 @@ class DebinControllerIntegrationTest {
         )
 
         val callbackBody = """
-            { "id": ${debin.id} }
+            { "id": ${99999L} }
         """.trimIndent()
 
         mockMvc.perform(
             post("/api/debin/callback")
                 .header("Authorization", token)
-                .header("X-Signature", "invalid-signature")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(callbackBody),
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_SIGNATURE))
+            .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_CALLBACK_REQUEST))
     }
 }

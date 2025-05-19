@@ -5,7 +5,6 @@ import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.entity.User
 import org.austral.librawallet.auth.repository.UserRepository
-import org.austral.librawallet.auth.util.JwtUtil
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
 import org.austral.librawallet.util.UserTestUtils
@@ -44,9 +43,6 @@ class AccountControllerTests {
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
-
-    @Autowired
-    lateinit var jwtUtils: JwtUtil
 
     @Autowired
     lateinit var userTestUtils: UserTestUtils

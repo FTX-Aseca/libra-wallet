@@ -37,7 +37,8 @@ class TopUpServiceTest {
 
     @BeforeEach
     fun setup() {
-        topUpService = TopUpService(accountRepository, topUpOrderRepository, transactionRepository = transactionRepository)
+        topUpService =
+            TopUpService(accountRepository, topUpOrderRepository, transactionRepository = transactionRepository)
     }
 
     @Test

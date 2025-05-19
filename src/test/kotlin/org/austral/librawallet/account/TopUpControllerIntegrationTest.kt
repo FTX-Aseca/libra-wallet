@@ -5,8 +5,6 @@ import org.austral.librawallet.account.entity.TopUpOrder
 import org.austral.librawallet.account.entity.TopUpStatus
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TopUpOrderRepository
-import org.austral.librawallet.auth.repository.UserRepository
-import org.austral.librawallet.auth.util.JwtUtil
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -37,16 +34,7 @@ class TopUpControllerIntegrationTest {
     private lateinit var databaseInitializationService: DatabaseInitializationService
 
     @Autowired
-    private lateinit var userRepository: UserRepository
-
-    @Autowired
     private lateinit var accountRepository: AccountRepository
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
-
-    @Autowired
-    private lateinit var jwtUtils: JwtUtil
 
     @Autowired
     private lateinit var topUpOrderRepository: TopUpOrderRepository
@@ -126,7 +114,7 @@ class TopUpControllerIntegrationTest {
         val account = accountRepository.save(Account(user = user, balance = 0L))
         val amount = 25.0
         // create a pending top-up order
-        val topUp = topUpOrderRepository.save(
+        topUpOrderRepository.save(
             TopUpOrder(
                 account = account,
                 amount = formattedDoubleToCents(amount),
@@ -134,17 +122,16 @@ class TopUpControllerIntegrationTest {
             ),
         )
         val callbackBody = """
-            { "id": ${topUp.id} }
+            { "id": ${9999999L} }
         """.trimIndent()
 
         mockMvc.perform(
             post("/api/topup/callback")
                 .header("Authorization", token)
-                .header("X-Signature", "invalid-signature")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(callbackBody),
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_SIGNATURE))
+            .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_CALLBACK_REQUEST))
     }
 }
