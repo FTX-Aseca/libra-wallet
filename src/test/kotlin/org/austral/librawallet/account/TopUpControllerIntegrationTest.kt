@@ -121,8 +121,9 @@ class TopUpControllerIntegrationTest {
                 status = TopUpStatus.PENDING,
             ),
         )
+        val invalidId = 9999999L
         val callbackBody = """
-            { "id": ${9999999L} }
+            { "id": $invalidId }
         """.trimIndent()
 
         mockMvc.perform(

@@ -2,7 +2,6 @@ package org.austral.librawallet.account
 
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.repository.AccountRepository
-import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.entity.User
 import org.austral.librawallet.auth.repository.UserRepository
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
@@ -28,9 +27,6 @@ class AccountControllerTests {
 
     @Autowired
     private lateinit var databaseInitializationService: DatabaseInitializationService
-
-    @Autowired
-    private lateinit var transactionRepository: TransactionRepository
 
     @Autowired
     lateinit var mockMvc: MockMvc

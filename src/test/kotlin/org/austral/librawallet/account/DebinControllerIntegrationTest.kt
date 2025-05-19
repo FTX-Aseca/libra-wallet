@@ -2,7 +2,6 @@ package org.austral.librawallet.account
 
 import org.austral.librawallet.account.entity.DebinRequest
 import org.austral.librawallet.account.entity.DebinStatus
-import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.DebinRequestRepository
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
@@ -31,9 +30,6 @@ class DebinControllerIntegrationTest {
 
     @Autowired
     private lateinit var databaseInitializationService: DatabaseInitializationService
-
-    @Autowired
-    private lateinit var accountRepository: AccountRepository
 
     @Autowired
     private lateinit var debinRequestRepository: DebinRequestRepository
@@ -112,9 +108,9 @@ class DebinControllerIntegrationTest {
                 status = DebinStatus.PENDING,
             ),
         )
-
+        val invalidId = 99999L
         val callbackBody = """
-            { "id": ${99999L} }
+            { "id": $invalidId }
         """.trimIndent()
 
         mockMvc.perform(
