@@ -5,4 +5,4 @@ package org.austral.librawallet.account.dto.topup
  */
 data class TopUpCallbackRequest(
     val id: Long,
-) 
+)
