@@ -71,6 +71,14 @@ class AccountTransactionControllerTests {
         transactionRepository.save(transaction)
     }
 
+    private fun buildTransactionRequestJson(type: TransactionType, amount: Double, description: String) = """
+        {
+            "type": "${type.name}",
+            "amount": $amount,
+            "description": "$description"
+        }
+    """.trimIndent()
+
     @Test
     fun `AC1-1 POST with valid payload returns HTTP 201 and persisted transaction JSON for income`() {
         val initialBalance = 100.00
@@ -79,13 +87,7 @@ class AccountTransactionControllerTests {
         val (user, jwt) = userTestUtils.createUserAndToken("user5@example.com", "Passw0rd!")
         val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
-        val requestBody = """
-            {
-                "type": "INCOME",
-                "amount": $depositAmount,
-                "description": "$description"
-            }
-        """.trimIndent()
+        val requestBody = buildTransactionRequestJson(TransactionType.INCOME, depositAmount, description)
 
         mockMvc.perform(
             post(transactionsUrl, account.id!!)
@@ -115,13 +117,7 @@ class AccountTransactionControllerTests {
         val (user, jwt) = userTestUtils.createUserAndToken("user6@example.com", "Passw0rd!")
         val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
-        val requestBody = """
-            {
-                "type": "EXPENSE",
-                "amount": $withdrawalAmount,
-                "description": "$description"
-            }
-        """.trimIndent()
+        val requestBody = buildTransactionRequestJson(TransactionType.EXPENSE, withdrawalAmount, description)
 
         mockMvc.perform(
             post(transactionsUrl, account.id!!)
@@ -230,13 +226,7 @@ class AccountTransactionControllerTests {
         val (user, jwt) = userTestUtils.createUserAndToken("user7@example.com", "Passw0rd!")
         val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
-        val requestBody = """
-            {
-                "type": "EXPENSE",
-                "amount": $withdrawalAmount,
-                "description": "$description"
-            }
-        """.trimIndent()
+        val requestBody = buildTransactionRequestJson(TransactionType.EXPENSE, withdrawalAmount, description)
 
         mockMvc.perform(
             post(transactionsUrl, account.id!!)

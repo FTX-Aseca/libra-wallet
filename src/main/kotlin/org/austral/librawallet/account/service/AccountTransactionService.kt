@@ -1,7 +1,7 @@
 package org.austral.librawallet.account.service
 
-import org.austral.librawallet.account.dto.TransactionRequest
-import org.austral.librawallet.account.dto.TransactionResponse
+import org.austral.librawallet.account.dto.transaction.TransactionRequest
+import org.austral.librawallet.account.dto.transaction.TransactionResponse
 import org.austral.librawallet.account.entity.Transaction
 import org.austral.librawallet.account.entity.TransactionType
 import org.austral.librawallet.account.exceptions.ForbiddenException
@@ -9,6 +9,7 @@ import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.exception.ConflictException
+import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.centsToFormattedDouble
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.springframework.stereotype.Service
@@ -40,8 +41,8 @@ class AccountTransactionService(
 
         val amountInCents = formattedDoubleToCents(request.amount)
 
-        if (request.type == org.austral.librawallet.account.entity.TransactionType.EXPENSE && account.balance < amountInCents) {
-            throw ConflictException("Insufficient funds")
+        if (request.type == TransactionType.EXPENSE && account.balance < amountInCents) {
+            throw ConflictException(ErrorMessages.INSUFFICIENT_FUNDS)
         }
 
         when (request.type) {
@@ -71,8 +72,8 @@ class AccountTransactionService(
         jwtUserId.toLongOrNull()?.let { userIdLong ->
             accountRepository.findById(accountId).orElse(null)?.also { account ->
                 if (account.user.id != userIdLong) {
-                    throw ForbiddenException("Account does not belong to authenticated user")
+                    throw ForbiddenException(ErrorMessages.ACCOUNT_DOES_NOT_BELONG)
                 }
-            } ?: throw NotFoundException("Account not found")
-        } ?: throw ForbiddenException("Invalid user ID format")
+            } ?: throw NotFoundException(ErrorMessages.ACCOUNT_NOT_FOUND)
+        } ?: throw ForbiddenException(ErrorMessages.INVALID_USER_ID_FORMAT)
 }

@@ -1,7 +1,7 @@
 package org.austral.librawallet.account.controller
 
-import org.austral.librawallet.account.dto.TransferRequest
-import org.austral.librawallet.account.dto.TransferResponse
+import org.austral.librawallet.account.dto.transfer.TransferRequest
+import org.austral.librawallet.account.dto.transfer.TransferResponse
 import org.austral.librawallet.account.service.TransferService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal

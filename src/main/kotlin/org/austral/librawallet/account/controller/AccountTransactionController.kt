@@ -1,7 +1,7 @@
 package org.austral.librawallet.account.controller
 
-import org.austral.librawallet.account.dto.TransactionRequest
-import org.austral.librawallet.account.dto.TransactionResponse
+import org.austral.librawallet.account.dto.transaction.TransactionRequest
+import org.austral.librawallet.account.dto.transaction.TransactionResponse
 import org.austral.librawallet.account.service.AccountTransactionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

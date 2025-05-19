@@ -8,6 +8,7 @@ import org.austral.librawallet.auth.exception.ConflictException
 import org.austral.librawallet.auth.exception.UnauthorizedException
 import org.austral.librawallet.auth.repository.UserRepository
 import org.austral.librawallet.auth.util.JwtUtil
+import org.austral.librawallet.shared.constants.ErrorMessages
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -20,7 +21,7 @@ class AuthService(
 
     fun register(request: RegisterRequest): User {
         if (userRepository.findByEmail(request.email).isPresent) {
-            throw ConflictException("Email already registered")
+            throw ConflictException(ErrorMessages.EMAIL_ALREADY_REGISTERED)
         }
         val hashed = passwordEncoder.encode(request.password)
         val user = User(email = request.email, password = hashed)
@@ -32,9 +33,9 @@ class AuthService(
 
     fun login(request: LoginRequest): String {
         val user = userRepository.findByEmail(request.email)
-            .orElseThrow { UnauthorizedException("Invalid credentials") }
+            .orElseThrow { UnauthorizedException(ErrorMessages.INVALID_CREDENTIALS) }
         if (!passwordEncoder.matches(request.password, user.password)) {
-            throw UnauthorizedException("Invalid credentials")
+            throw UnauthorizedException(ErrorMessages.INVALID_CREDENTIALS)
         }
         return jwtUtil.generateToken(user)
     }

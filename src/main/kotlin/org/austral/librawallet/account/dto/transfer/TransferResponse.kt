@@ -1,4 +1,4 @@
-package org.austral.librawallet.account.dto
+package org.austral.librawallet.account.dto.transfer
 
 /**
  * Response for a peer-to-peer transfer returning updated balances.
