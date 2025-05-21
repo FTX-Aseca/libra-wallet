@@ -10,6 +10,7 @@ env:
   REGISTRY: ghcr.io
   OWNER: ${{ github.repository_owner }}
   IMAGE_NAME: ${{ endsWith(github.ref_name, '-dev') && 'libra-wallet-api-dev' || 'libra-wallet-api' }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
 jobs:
   build-and-push:
@@ -92,7 +93,7 @@ jobs:
           # Calculate next version
           NEXT_PATCH=$(( ${{ steps.get_version.outputs.patch }} + 1 ))
           NEXT_VERSION="${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.$NEXT_PATCH-SNAPSHOT"
-          
+
           # Update version in build.gradle using sed
           if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS requires an empty string for -i
@@ -101,7 +102,7 @@ jobs:
             # Linux
             sed -i "s/version = '.*'/version = '$NEXT_VERSION'/" build.gradle
           fi
-          
+
           # Verify the change
           echo "Updated version to: $NEXT_VERSION"
           cat build.gradle | grep "version ="
@@ -115,8 +116,8 @@ jobs:
           title: "chore: bump version to $NEXT_VERSION"
           body: |
             This PR was automatically created to bump the version after release v${{ steps.get_version.outputs.version }}.
-            
+
             Changes:
             - Updated version in build.gradle from ${{ steps.get_version.outputs.version }} to $NEXT_VERSION
           branch: version-bump
-          base: main 
+          base: main
