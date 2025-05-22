@@ -1,8 +1,8 @@
 package org.austral.librawallet.account.service
 
-import org.austral.librawallet.account.dto.TransactionResponse
-import org.austral.librawallet.account.dto.TransferRequest
-import org.austral.librawallet.account.dto.TransferResponse
+import org.austral.librawallet.account.dto.transaction.TransactionResponse
+import org.austral.librawallet.account.dto.transfer.TransferRequest
+import org.austral.librawallet.account.dto.transfer.TransferResponse
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.Transaction
 import org.austral.librawallet.account.entity.TransactionType
@@ -11,6 +11,7 @@ import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.exception.ConflictException
+import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.centsToFormattedDouble
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.springframework.stereotype.Service
@@ -30,7 +31,7 @@ class TransferService(
         val amountInCents = formattedDoubleToCents(request.amount)
 
         if (senderAccount.balance < amountInCents) {
-            throw ConflictException("Insufficient funds")
+            throw ConflictException(ErrorMessages.INSUFFICIENT_FUNDS)
         }
 
         updateBalances(senderAccount, amountInCents, recipientAccount)
@@ -82,9 +83,9 @@ class TransferService(
 
     fun getTransactions(jwtUserId: String): List<TransactionResponse> {
         val userIdLong = jwtUserId.toLongOrNull()
-            ?: throw ForbiddenException("Invalid user ID format")
+            ?: throw ForbiddenException(ErrorMessages.INVALID_USER_ID_FORMAT)
         val account = accountRepository.findByUserId(userIdLong)
-            ?: throw NotFoundException("Account not found")
+            ?: throw NotFoundException(ErrorMessages.ACCOUNT_NOT_FOUND)
         val transactions = transactionRepository.findByAccountId(account.id!!)
         return transactions.map { tx ->
             TransactionResponse(
@@ -98,9 +99,9 @@ class TransferService(
 
     private fun getSenderAccountOrThrow(jwtUserId: String): Account {
         val userIdLong = jwtUserId.toLongOrNull()
-            ?: throw ForbiddenException("Invalid user ID format")
+            ?: throw ForbiddenException(ErrorMessages.INVALID_USER_ID_FORMAT)
         val senderAccount = accountRepository.findByUserId(userIdLong)
-            ?: throw NotFoundException("Sender account not found")
+            ?: throw NotFoundException(ErrorMessages.SENDER_ACCOUNT_NOT_FOUND)
         return senderAccount
     }
 }

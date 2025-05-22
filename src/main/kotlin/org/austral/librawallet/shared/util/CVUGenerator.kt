@@ -1,6 +1,6 @@
 package org.austral.librawallet.shared.util
 
-import java.util.Random
+import java.util.*
 
 object CVUGenerator {
     private val random = Random()

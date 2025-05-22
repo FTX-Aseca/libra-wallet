@@ -5,8 +5,6 @@ import org.austral.librawallet.account.entity.Transaction
 import org.austral.librawallet.account.entity.TransactionType
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
-import org.austral.librawallet.auth.repository.UserRepository
-import org.austral.librawallet.auth.util.JwtUtil
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
 import org.austral.librawallet.util.UserTestUtils
@@ -16,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -37,19 +34,10 @@ class AccountTransactionControllerTests {
     lateinit var mockMvc: MockMvc
 
     @Autowired
-    lateinit var userRepository: UserRepository
-
-    @Autowired
     lateinit var accountRepository: AccountRepository
 
     @Autowired
     lateinit var transactionRepository: TransactionRepository
-
-    @Autowired
-    lateinit var passwordEncoder: PasswordEncoder
-
-    @Autowired
-    lateinit var jwtUtils: JwtUtil
 
     @Autowired
     lateinit var userTestUtils: UserTestUtils
@@ -71,6 +59,14 @@ class AccountTransactionControllerTests {
         transactionRepository.save(transaction)
     }
 
+    private fun buildTransactionRequestJson(type: TransactionType, amount: Double, description: String) = """
+        {
+            "type": "${type.name}",
+            "amount": $amount,
+            "description": "$description"
+        }
+    """.trimIndent()
+
     @Test
     fun `AC1-1 POST with valid payload returns HTTP 201 and persisted transaction JSON for income`() {
         val initialBalance = 100.00
@@ -79,13 +75,7 @@ class AccountTransactionControllerTests {
         val (user, jwt) = userTestUtils.createUserAndToken("user5@example.com", "Passw0rd!")
         val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
-        val requestBody = """
-            {
-                "type": "INCOME",
-                "amount": $depositAmount,
-                "description": "$description"
-            }
-        """.trimIndent()
+        val requestBody = buildTransactionRequestJson(TransactionType.INCOME, depositAmount, description)
 
         mockMvc.perform(
             post(transactionsUrl, account.id!!)
@@ -115,13 +105,7 @@ class AccountTransactionControllerTests {
         val (user, jwt) = userTestUtils.createUserAndToken("user6@example.com", "Passw0rd!")
         val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
-        val requestBody = """
-            {
-                "type": "EXPENSE",
-                "amount": $withdrawalAmount,
-                "description": "$description"
-            }
-        """.trimIndent()
+        val requestBody = buildTransactionRequestJson(TransactionType.EXPENSE, withdrawalAmount, description)
 
         mockMvc.perform(
             post(transactionsUrl, account.id!!)
@@ -199,7 +183,7 @@ class AccountTransactionControllerTests {
         val (intruder, intruderJwt) = userTestUtils.createUserAndToken("intruder@example.com", "IntruderPass2!")
 
         val ownerAccount = accountRepository.save(Account(user = owner, balance = formattedDoubleToCents(20.00)))
-        val intruderAccount = accountRepository.save(Account(user = intruder, balance = formattedDoubleToCents(20.00)))
+        accountRepository.save(Account(user = intruder, balance = formattedDoubleToCents(20.00)))
 
         mockMvc.perform(
             get(transactionsUrl, ownerAccount.id!!)
@@ -209,7 +193,7 @@ class AccountTransactionControllerTests {
 
     @Test
     fun `AC4 non-existent accountId returns HTTP 404`() {
-        val (user, jwt) = userTestUtils.createUserAndToken("user3@example.com", "Passw0rd!")
+        val (_, jwt) = userTestUtils.createUserAndToken("user3@example.com", "Passw0rd!")
         val nonexistentId = 9999999L
 
         mockMvc.perform(
@@ -230,13 +214,7 @@ class AccountTransactionControllerTests {
         val (user, jwt) = userTestUtils.createUserAndToken("user7@example.com", "Passw0rd!")
         val account = accountRepository.save(Account(user = user, balance = formattedDoubleToCents(initialBalance)))
 
-        val requestBody = """
-            {
-                "type": "EXPENSE",
-                "amount": $withdrawalAmount,
-                "description": "$description"
-            }
-        """.trimIndent()
+        val requestBody = buildTransactionRequestJson(TransactionType.EXPENSE, withdrawalAmount, description)
 
         mockMvc.perform(
             post(transactionsUrl, account.id!!)

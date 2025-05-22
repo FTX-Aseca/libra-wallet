@@ -25,4 +25,10 @@ class AccountRestExceptionHandler {
         val body = mapOf("error" to (ex.message ?: "Conflict"))
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body)
     }
+
+    @ExceptionHandler(BadRequestException::class)
+    fun handleBadRequest(ex: BadRequestException): ResponseEntity<Map<String, String>> {
+        val body = mapOf("error" to (ex.message ?: "Bad request"))
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body)
+    }
 }

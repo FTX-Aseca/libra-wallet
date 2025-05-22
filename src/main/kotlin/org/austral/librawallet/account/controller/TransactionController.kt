@@ -1,6 +1,6 @@
 package org.austral.librawallet.account.controller
 
-import org.austral.librawallet.account.dto.TransactionResponse
+import org.austral.librawallet.account.dto.transaction.TransactionResponse
 import org.austral.librawallet.account.service.TransferService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal

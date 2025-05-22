@@ -3,6 +3,7 @@ package org.austral.librawallet.auth
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.repository.UserRepository
+import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.util.DatabaseInitializationService
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -87,7 +88,7 @@ class AuthControllerTests {
                 .content(body),
         )
             .andExpect(status().isConflict)
-            .andExpect(jsonPath("$.error").value("Email already registered"))
+            .andExpect(jsonPath("$.error").value(ErrorMessages.EMAIL_ALREADY_REGISTERED))
     }
 
     @Test

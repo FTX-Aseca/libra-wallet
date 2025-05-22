@@ -1,4 +1,4 @@
-package org.austral.librawallet.account.dto
+package org.austral.librawallet.account.dto.transaction
 
 import org.austral.librawallet.account.entity.TransactionType
 

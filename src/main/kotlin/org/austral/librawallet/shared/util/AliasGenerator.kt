@@ -1,6 +1,6 @@
 package org.austral.librawallet.shared.util
 
-import java.util.Random
+import java.util.*
 
 private const val MAX_RANDOM_NUMBER = 1000
 
