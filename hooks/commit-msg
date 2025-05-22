@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Commit-msg hook to enforce Conventional Commit header format
+# Usage: <type>(<scope>): <short description>
+
+commit_msg_file="$1"
+
+# Regex for header: type(scope): short description
+header_regex='^(feat|fix|build|chore|ci|docs|perf|refactor|revert|style|test)(\([^)]+\))?: .+'
+
+if ! grep -qE "$header_regex" "$commit_msg_file"; then
+  echo "ERROR: Commit message header must be '<type>(<scope>): <short description>'"
+  exit 1
+fi
+
+exit 0 

@@ -57,3 +57,9 @@ Una plataforma **end-to-end** (web y mobile) para gestionar y monitorear una bil
 ---
 
 ¡Bienvenido a Libra Wallet! Para más detalles, consulta la **documentación interna** y el **roadmap de QA** en el repositorio.
+
+> Nota para desarrolladores:
+> Previo a iniciar con el proyecto, asegúrate de tener el `commit_message` pre-seteado, usando el siguiente comando:
+```bash
+git config commit.template .gitmessage
+ ```
