@@ -5,5 +5,6 @@ package org.austral.librawallet.account.dto.debin
  */
 data class DebinResponse(
     val id: Long,
-    val status: String,
+    val amount: Double,
+    val status: String
 )
