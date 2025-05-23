@@ -4,6 +4,7 @@ import org.austral.librawallet.account.dto.transaction.TransactionRequest
 import org.austral.librawallet.account.dto.transaction.TransactionResponse
 import org.austral.librawallet.account.entity.Transaction
 import org.austral.librawallet.account.entity.TransactionType
+import org.austral.librawallet.account.exceptions.BadRequestException
 import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
@@ -38,6 +39,10 @@ class AccountTransactionService(
     @Transactional
     fun createTransaction(accountId: Long, request: TransactionRequest, jwtUserId: String): TransactionResponse {
         val account = validateAccount(accountId, jwtUserId)
+
+        if (request.amount <= 0) {
+            throw BadRequestException(ErrorMessages.INVALID_AMOUNT)
+        }
 
         val amountInCents = formattedDoubleToCents(request.amount)
 
