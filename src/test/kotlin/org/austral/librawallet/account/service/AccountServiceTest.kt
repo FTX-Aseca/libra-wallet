@@ -2,10 +2,10 @@ package org.austral.librawallet.account.service
 
 import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.entity.Account
-import org.austral.librawallet.auth.entity.User
 import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
+import org.austral.librawallet.auth.entity.User
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
@@ -127,4 +127,4 @@ class AccountServiceTest {
             accountService.getAccountOrThrow(IdentifierType.CVU, cvu)
         }
     }
-} 
+}

@@ -1,25 +1,25 @@
 package org.austral.librawallet.account.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.austral.librawallet.account.dto.topup.TopUpCallbackRequest
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.dto.topup.TopUpResponse
-import org.austral.librawallet.account.dto.topup.TopUpCallbackRequest
+import org.austral.librawallet.account.exceptions.BadRequestException
 import org.austral.librawallet.account.service.TopUpService
 import org.austral.librawallet.auth.config.SecurityConfig
 import org.austral.librawallet.auth.config.WithMockJwt
-import org.austral.librawallet.account.exceptions.BadRequestException
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(TopUpController::class)
 @Import(SecurityConfig::class)
@@ -31,7 +31,7 @@ class TopUpControllerTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @MockBean
+    @MockitoBean
     private lateinit var topUpService: TopUpService
 
     @Test
@@ -39,12 +39,12 @@ class TopUpControllerTest {
     fun `topUp should return 201 when successful`() {
         // Given
         val request = TopUpRequest(
-            amount = 100.0
+            amount = 100.0,
         )
 
         val response = TopUpResponse(
             id = 1L,
-            status = "PENDING"
+            status = "PENDING",
         )
 
         whenever(topUpService.topUp(request, "1")).thenReturn(response)
@@ -53,7 +53,7 @@ class TopUpControllerTest {
         mockMvc.perform(
             post("/api/topup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(1))
@@ -65,7 +65,7 @@ class TopUpControllerTest {
     fun `topUp should return 400 when request is invalid`() {
         // Given
         val request = TopUpRequest(
-            amount = -100.0
+            amount = -100.0,
         )
 
         whenever(topUpService.topUp(request, "1")).thenThrow(BadRequestException(ErrorMessages.INVALID_AMOUNT))
@@ -74,7 +74,7 @@ class TopUpControllerTest {
         mockMvc.perform(
             post("/api/topup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_AMOUNT))
@@ -84,14 +84,14 @@ class TopUpControllerTest {
     fun `topUp should return 401 when not authenticated`() {
         // Given
         val request = TopUpRequest(
-            amount = 100.0
+            amount = 100.0,
         )
 
         // When/Then
         mockMvc.perform(
             post("/api/topup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isUnauthorized)
     }
@@ -100,12 +100,12 @@ class TopUpControllerTest {
     fun `callback should return 200 when successful`() {
         // Given
         val request = TopUpCallbackRequest(
-            id = 1L
+            id = 1L,
         )
 
         val response = TopUpResponse(
             id = request.id,
-            status = "COMPLETED"
+            status = "COMPLETED",
         )
 
         whenever(topUpService.handleCallback(request)).thenReturn(response)
@@ -114,7 +114,7 @@ class TopUpControllerTest {
         mockMvc.perform(
             post("/api/topup/callback")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(1))
@@ -125,7 +125,7 @@ class TopUpControllerTest {
     fun `callback should return 400 when request is invalid`() {
         // Given
         val request = TopUpCallbackRequest(
-            id = -1L
+            id = -1L,
         )
 
         whenever(topUpService.handleCallback(request)).thenThrow(BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST))
@@ -134,9 +134,9 @@ class TopUpControllerTest {
         mockMvc.perform(
             post("/api/topup/callback")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_CALLBACK_REQUEST))
     }
-} 
+}

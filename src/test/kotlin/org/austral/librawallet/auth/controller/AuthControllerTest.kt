@@ -2,21 +2,21 @@ package org.austral.librawallet.auth.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.austral.librawallet.account.entity.Account
+import org.austral.librawallet.auth.config.SecurityConfig
 import org.austral.librawallet.auth.dto.LoginRequest
 import org.austral.librawallet.auth.dto.RegisterRequest
 import org.austral.librawallet.auth.entity.User
-import org.austral.librawallet.auth.service.AuthService
-import org.austral.librawallet.auth.config.SecurityConfig
 import org.austral.librawallet.auth.exception.ConflictException
+import org.austral.librawallet.auth.service.AuthService
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -32,7 +32,7 @@ class AuthControllerTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @MockBean
+    @MockitoBean
     private lateinit var authService: AuthService
 
     @Test
@@ -48,7 +48,7 @@ class AuthControllerTest {
         mockMvc.perform(
             post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(1))
@@ -66,7 +66,7 @@ class AuthControllerTest {
         mockMvc.perform(
             post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isConflict)
             .andExpect(jsonPath("$.error").value(ErrorMessages.EMAIL_ALREADY_REGISTERED))
@@ -83,9 +83,9 @@ class AuthControllerTest {
         mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.token").value(token))
     }
-} 
+}

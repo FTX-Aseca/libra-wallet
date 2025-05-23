@@ -1,6 +1,5 @@
 package org.austral.librawallet.auth.service
 
-import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.auth.dto.LoginRequest
 import org.austral.librawallet.auth.dto.RegisterRequest
 import org.austral.librawallet.auth.entity.User

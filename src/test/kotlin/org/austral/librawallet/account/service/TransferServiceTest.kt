@@ -2,23 +2,25 @@ package org.austral.librawallet.account.service
 
 import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.dto.transfer.TransferRequest
-import org.austral.librawallet.account.dto.transfer.TransferResponse
 import org.austral.librawallet.account.entity.Account
+import org.austral.librawallet.account.exceptions.ForbiddenException
+import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.entity.User
-import org.austral.librawallet.account.exceptions.ForbiddenException
-import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.auth.exception.ConflictException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.any
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
-import org.junit.jupiter.api.extension.ExtendWith
-import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class TransferServiceTest {
@@ -52,7 +54,7 @@ class TransferServiceTest {
         val request = TransferRequest(
             toIdentifier = "receiver-cvu",
             identifierType = IdentifierType.CVU,
-            amount = 50.0
+            amount = 50.0,
         )
         `when`(accountRepository.findByUserId(1L)).thenReturn(senderAccount)
         `when`(accountService.getAccountOrThrow(IdentifierType.CVU, "receiver-cvu")).thenReturn(receiverAccount)
@@ -76,7 +78,7 @@ class TransferServiceTest {
         val request = TransferRequest(
             toIdentifier = "receiver-cvu",
             identifierType = IdentifierType.CVU,
-            amount = 200.0
+            amount = 200.0,
         )
         `when`(accountRepository.findByUserId(1L)).thenReturn(senderAccount)
         `when`(accountService.getAccountOrThrow(IdentifierType.CVU, "receiver-cvu")).thenReturn(receiverAccount)
@@ -93,7 +95,7 @@ class TransferServiceTest {
         val request = TransferRequest(
             toIdentifier = "receiver-cvu",
             identifierType = IdentifierType.CVU,
-            amount = 50.0
+            amount = 50.0,
         )
 
         // When/Then
@@ -108,7 +110,7 @@ class TransferServiceTest {
         val request = TransferRequest(
             toIdentifier = "receiver-cvu",
             identifierType = IdentifierType.CVU,
-            amount = 50.0
+            amount = 50.0,
         )
         `when`(accountRepository.findByUserId(1L)).thenReturn(null)
 
@@ -153,4 +155,4 @@ class TransferServiceTest {
             transferService.getTransactions("999")
         }
     }
-} 
+}
