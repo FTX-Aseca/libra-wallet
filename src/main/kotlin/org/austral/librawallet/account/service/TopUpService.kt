@@ -26,6 +26,10 @@ class TopUpService(
 ) {
 
     fun topUp(request: TopUpRequest, jwtUserId: String): TopUpResponse {
+        if (request.amount <= 0) {
+            throw BadRequestException(ErrorMessages.INVALID_AMOUNT)
+        }
+
         val userIdLong = jwtUserId.toLongOrNull()
             ?: throw ForbiddenException(ErrorMessages.INVALID_USER_ID_FORMAT)
         val account = accountRepository.findByUserId(userIdLong)
@@ -46,6 +50,9 @@ class TopUpService(
 
     @Transactional
     fun handleCallback(callback: TopUpCallbackRequest): TopUpResponse {
+        if (callback.id <= 0) {
+            throw BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST)
+        }
         val order = topUpOrderRepository.findById(callback.id)
             .orElseThrow { BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST) }
         if (order.status != TopUpStatus.PENDING) {

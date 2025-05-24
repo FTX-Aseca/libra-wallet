@@ -40,6 +40,8 @@ class SecurityConfig {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/debin/callback").permitAll()
+                    .requestMatchers("/api/topup/callback").permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2ResourceServer { oauth2 ->

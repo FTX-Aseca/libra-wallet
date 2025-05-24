@@ -10,4 +10,5 @@ object ErrorMessages {
     const val RECIPIENT_ACCOUNT_NOT_FOUND = "Recipient account not found"
     const val INVALID_CALLBACK_REQUEST = "Invalid callback request"
     const val ACCOUNT_DOES_NOT_BELONG = "Account does not belong to authenticated user"
+    const val INVALID_AMOUNT = "Amount must be greater than zero"
 }

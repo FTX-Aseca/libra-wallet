@@ -6,6 +6,7 @@ import org.austral.librawallet.account.dto.transfer.TransferResponse
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.Transaction
 import org.austral.librawallet.account.entity.TransactionType
+import org.austral.librawallet.account.exceptions.BadRequestException
 import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
@@ -26,6 +27,10 @@ class TransferService(
 
     @Transactional
     fun transfer(request: TransferRequest, jwtUserId: String): TransferResponse {
+        if (request.amount <= 0) {
+            throw BadRequestException(ErrorMessages.INVALID_AMOUNT)
+        }
+
         val senderAccount = getSenderAccountOrThrow(jwtUserId)
         val recipientAccount = accountService.getAccountOrThrow(request.identifierType, request.toIdentifier)
         val amountInCents = formattedDoubleToCents(request.amount)

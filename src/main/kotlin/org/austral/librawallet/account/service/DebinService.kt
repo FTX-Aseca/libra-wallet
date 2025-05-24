@@ -26,6 +26,9 @@ class DebinService(
 ) {
 
     fun requestDebin(request: DebinRequestDto, jwtUserId: String): DebinResponse {
+        if (request.amount <= 0) {
+            throw BadRequestException(ErrorMessages.INVALID_AMOUNT)
+        }
         val userIdLong = jwtUserId.toLongOrNull()
             ?: throw ForbiddenException(ErrorMessages.INVALID_USER_ID_FORMAT)
         val account = accountRepository.findByUserId(userIdLong)
@@ -40,12 +43,16 @@ class DebinService(
         )
         return DebinResponse(
             id = debin.id!!,
+            amount = request.amount,
             status = debin.status.name,
         )
     }
 
     @Transactional
     fun handleCallback(callback: DebinCallbackRequest): DebinResponse {
+        if (callback.id <= 0) {
+            throw BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST)
+        }
         val debin = debinRequestRepository.findById(callback.id)
             .orElseThrow { BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST) }
         if (debin.status != DebinStatus.PENDING) {
@@ -68,6 +75,7 @@ class DebinService(
         debinRequestRepository.save(debin)
         return DebinResponse(
             id = debin.id!!,
+            amount = debin.amount / 100.0, // Convert cents to dollars
             status = debin.status.name,
         )
     }
