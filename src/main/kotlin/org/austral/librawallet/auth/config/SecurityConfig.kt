@@ -1,20 +1,28 @@
 package org.austral.librawallet.auth.config
 
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import javax.crypto.spec.SecretKeySpec
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 class SecurityConfig {
-
     /**
      * Provides a BCryptPasswordEncoder bean for password hashing.
      */
@@ -26,21 +34,35 @@ class SecurityConfig {
      */
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http {
-            csrf { disable() }
-
-            cors {}
-
-            sessionManagement {
-                sessionCreationPolicy = SessionCreationPolicy.STATELESS
+        http
+            .csrf { it.disable() }
+            .cors {}
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests { auth ->
+                auth.requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/debin/callback").permitAll()
+                    .requestMatchers("/api/topup/callback").permitAll()
+                    .anyRequest().authenticated()
+            }
+            .oauth2ResourceServer { oauth2 ->
+                oauth2.jwt(Customizer.withDefaults())
+            }
+            .exceptionHandling { ex ->
+                ex.authenticationEntryPoint { _, res, _ ->
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                }
             }
 
-            authorizeHttpRequests {
-                authorize("/api/auth/**", permitAll)
-                authorize(anyRequest, authenticated)
-            }
-        }
         return http.build()
+    }
+
+    @Bean
+    fun jwtDecoder(
+        @Value("\${jwt.secret}") secret: String,
+    ): JwtDecoder {
+        val keyBytes = secret.toByteArray()
+        val secretKey = SecretKeySpec(keyBytes, "HmacSHA256")
+        return NimbusJwtDecoder.withSecretKey(secretKey).build()
     }
 
     @Bean

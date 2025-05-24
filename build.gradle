@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'org.austral'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-dev.2'
 
 java {
     toolchain {
@@ -30,12 +30,17 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'com.auth0:java-jwt:4.2.1'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
+    testImplementation 'io.mockk:mockk:1.13.9'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -63,6 +68,10 @@ ktlint {
     filter {
         exclude "**/generated/**"
     }
+}
+
+tasks.named('ktlintFormat') {
+    dependsOn 'ktlintTestSourceSetFormat'
 }
 
 
@@ -96,10 +105,10 @@ tasks.jacocoTestCoverageVerification {
 
 check.dependsOn jacocoTestReport, jacocoTestCoverageVerification
 
-tasks.register("addPreCommitGitHookOnBuild") {
+tasks.register("addGitHookOnBuild") {
 
     doLast {
-        println "⚈ ⚈ ⚈ Installing Git pre‑commit hooks ⚈ ⚈ ⚈"
+        println "⚈ ⚈ ⚈ Installing Git hooks ⚈ ⚈ ⚈"
         def sourceDir = file("hooks")
         def targetDir = file(".git/hooks")
 
@@ -122,5 +131,5 @@ tasks.register("addPreCommitGitHookOnBuild") {
 }
 
 tasks.named("build") {
-    finalizedBy(tasks.named("addPreCommitGitHookOnBuild"))
+    finalizedBy(tasks.named("addGitHookOnBuild"))
 }

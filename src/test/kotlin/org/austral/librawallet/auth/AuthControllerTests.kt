@@ -1,6 +1,10 @@
 package org.austral.librawallet.auth
 
+import org.austral.librawallet.account.repository.AccountRepository
+import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.repository.UserRepository
+import org.austral.librawallet.shared.constants.ErrorMessages
+import org.austral.librawallet.util.DatabaseInitializationService
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -22,6 +26,15 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class AuthControllerTests {
 
     @Autowired
+    private lateinit var databaseInitializationService: DatabaseInitializationService
+
+    @Autowired
+    private lateinit var transactionRepository: TransactionRepository
+
+    @Autowired
+    private lateinit var accountRepository: AccountRepository
+
+    @Autowired
     lateinit var mockMvc: MockMvc
 
     @Autowired
@@ -35,13 +48,13 @@ class AuthControllerTests {
 
     @BeforeEach
     fun setup() {
-        userRepository.deleteAll()
+        databaseInitializationService.clean()
     }
 
     @Test
     fun `AC1 successful registration returns 201 and user id`() {
         val requestBody = """{"email":"test@example.com","password":"Passw0rd!"}"""
-        val result = mockMvc.perform(
+        mockMvc.perform(
             post(registerUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody),
@@ -75,7 +88,7 @@ class AuthControllerTests {
                 .content(body),
         )
             .andExpect(status().isConflict)
-            .andExpect(jsonPath("$.error").value("Email already registered"))
+            .andExpect(jsonPath("$.error").value(ErrorMessages.EMAIL_ALREADY_REGISTERED))
     }
 
     @Test

@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import org.austral.librawallet.auth.entity.User
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.util.Date
+import java.util.*
 
 @Component
 class JwtUtil(
