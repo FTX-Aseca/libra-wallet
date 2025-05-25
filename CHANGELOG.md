@@ -1,3 +1,23 @@
+# [1.0.0-dev.3](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0-dev.2...v1.0.0-dev.3) (2025-05-25)
+
+
+### Bug Fixes
+
+* **CD:** Updated CD workflow to trigger on published releases ([a71cc99](https://github.com/FTX-Aseca/libra-wallet/commit/a71cc99d5c8e82da770ba8fea879ad079ac1f9e7))
+
+
+### Features
+
+* **Docker:** Added Docker Compose ([4b0276d](https://github.com/FTX-Aseca/libra-wallet/commit/4b0276d1d884b6c5580d88c517189e069dd84715))
+
+
+### BREAKING CHANGES
+
+* **CD:** none
+Fixes: none
+* **Docker:** Now can use Docker Compose
+Fixes: none
+
 # [1.0.0-dev.2](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0-dev.1...v1.0.0-dev.2) (2025-05-24)
 
 
