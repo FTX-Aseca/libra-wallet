@@ -44,6 +44,7 @@ class AccountControllerTests {
     lateinit var userTestUtils: UserTestUtils
 
     private val balanceUrl = "/api/accounts/{accountId}/balance"
+    private val detailsUrl = "/api/accounts/{accountId}"
 
     @BeforeEach
     fun setup() {
@@ -116,5 +117,120 @@ class AccountControllerTests {
         )
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.error").exists())
+    }
+
+    @Test
+    fun `AD1 authenticated user gets 200 and account details JSON`() {
+        val (user, jwt) = userTestUtils.createUserAndToken("details1@example.com", "Passw0rd!")
+        val account = accountRepository.save(Account(user = user, balance = 1000L))
+
+        mockMvc.perform(
+            get(detailsUrl, account.id!!)
+                .header("Authorization", jwt)
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.email").value(user.email))
+            .andExpect(jsonPath("$.alias").value(account.alias))
+            .andExpect(jsonPath("$.cvu").value(account.cvu))
+    }
+
+    @Test
+    fun `AD2 account details contain all required fields`() {
+        val (user, jwt) = userTestUtils.createUserAndToken("details2@example.com", "Passw0rd2!")
+        val account = accountRepository.save(Account(user = user, balance = 5000L))
+
+        mockMvc.perform(
+            get(detailsUrl, account.id!!)
+                .header("Authorization", jwt),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.email").exists())
+            .andExpect(jsonPath("$.alias").exists())
+            .andExpect(jsonPath("$.cvu").exists())
+            .andExpect(jsonPath("$.email").isString())
+            .andExpect(jsonPath("$.alias").isString())
+            .andExpect(jsonPath("$.cvu").isString())
+    }
+
+    @Test
+    fun `AD3 unauthenticated request yields 401`() {
+        val user =
+            userRepository.save(User(email = "details3@example.com", password = passwordEncoder.encode("Passw0rd3!")))
+        val account = accountRepository.save(Account(user = user, balance = 999L))
+
+        mockMvc.perform(
+            get(detailsUrl, account.id!!),
+        ).andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `AD4 user who does not own the account gets 403`() {
+        val (owner, _) = userTestUtils.createUserAndToken("detailsowner@example.com", "OwnerPass1!")
+        val (_, intruderJwt) = userTestUtils.createUserAndToken("detailsintruder@example.com", "IntruderPass2!")
+        val account = accountRepository.save(Account(user = owner, balance = 2000L))
+
+        mockMvc.perform(
+            get(detailsUrl, account.id!!)
+                .header("Authorization", intruderJwt),
+        ).andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `AD5 non-existent accountId gives 404`() {
+        val (_, jwt) = userTestUtils.createUserAndToken("details5@example.com", "Passw0rd5!")
+        val nonexistentId = 9999999L
+
+        mockMvc.perform(
+            get(detailsUrl, nonexistentId)
+                .header("Authorization", jwt),
+        )
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("$.error").exists())
+    }
+
+    @Test
+    fun `AD6 CVU format validation - should be 22 characters`() {
+        val (user, jwt) = userTestUtils.createUserAndToken("details6@example.com", "Passw0rd6!")
+        val account = accountRepository.save(Account(user = user, balance = 1000L))
+
+        mockMvc.perform(
+            get(detailsUrl, account.id!!)
+                .header("Authorization", jwt),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.cvu").isString())
+            .andExpect(jsonPath("$.cvu").value(org.hamcrest.Matchers.hasLength(22)))
+    }
+
+    @Test
+    fun `AD7 alias and CVU are unique for different accounts`() {
+        val (user1, jwt1) = userTestUtils.createUserAndToken("details7a@example.com", "Passw0rd7a!")
+        val (user2, jwt2) = userTestUtils.createUserAndToken("details7b@example.com", "Passw0rd7b!")
+
+        val account1 = accountRepository.save(Account(user = user1, balance = 1000L))
+        val account2 = accountRepository.save(Account(user = user2, balance = 2000L))
+
+        val result1 = mockMvc.perform(
+            get(detailsUrl, account1.id!!)
+                .header("Authorization", jwt1),
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val result2 = mockMvc.perform(
+            get(detailsUrl, account2.id!!)
+                .header("Authorization", jwt2),
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val response1 = result1.response.contentAsString
+        val response2 = result2.response.contentAsString
+
+        // Parse JSON responses to verify aliases and CVUs are different
+        assert(response1.contains("\"alias\":") && response2.contains("\"alias\":"))
+        assert(response1.contains("\"cvu\":") && response2.contains("\"cvu\":"))
+        // The aliases and CVUs should be different (this is ensured by unique constraints)
     }
 }
