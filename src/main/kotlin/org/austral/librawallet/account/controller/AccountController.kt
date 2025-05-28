@@ -1,5 +1,6 @@
 package org.austral.librawallet.account.controller
 
+import org.austral.librawallet.account.dto.AccountDetails
 import org.austral.librawallet.account.dto.BalanceResponse
 import org.austral.librawallet.account.service.AccountService
 import org.springframework.http.ResponseEntity
@@ -23,5 +24,14 @@ class AccountController(
     ): ResponseEntity<BalanceResponse> {
         val balance = accountService.getBalance(accountId, jwt.subject)
         return ResponseEntity.ok(BalanceResponse(balance))
+    }
+
+    @GetMapping("/{accountId}")
+    fun getAccountDetails(
+        @PathVariable accountId: Long,
+        @AuthenticationPrincipal jwt: Jwt,
+    ): ResponseEntity<AccountDetails> {
+        val accountDetails = accountService.getAccountDetails(accountId, jwt.subject)
+        return ResponseEntity.ok(accountDetails)
     }
 }
