@@ -1,3 +1,10 @@
+# [1.0.0-dev.4](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2025-05-28)
+
+
+### Features
+
+* **account:** add account details endpoint ([278a946](https://github.com/FTX-Aseca/libra-wallet/commit/278a946daf51e7b65cef1e7094657db47dffe14d))
+
 # [1.0.0-dev.3](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0-dev.2...v1.0.0-dev.3) (2025-05-25)
 
 
