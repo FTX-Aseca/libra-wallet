@@ -26,6 +26,7 @@ abstract class IntegrationTestBase {
             setWaitStrategy(
                 Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(90)),
             )
+            withCommand("postgres", "-c", "log_statement=all")
         }
 
         @JvmStatic
