@@ -5,6 +5,7 @@ import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.repository.UserRepository
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.util.DatabaseInitializationService
+import org.austral.librawallet.util.IntegrationTestBase
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -14,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -23,7 +25,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class AuthControllerTests {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+class AuthControllerTests : IntegrationTestBase() {
 
     @Autowired
     private lateinit var databaseInitializationService: DatabaseInitializationService
