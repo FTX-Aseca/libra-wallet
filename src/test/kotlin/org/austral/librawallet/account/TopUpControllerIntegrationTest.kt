@@ -8,6 +8,7 @@ import org.austral.librawallet.account.repository.TopUpOrderRepository
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
+import org.austral.librawallet.util.IntegrationTestBase
 import org.austral.librawallet.util.UserTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class TopUpControllerIntegrationTest {
+class TopUpControllerIntegrationTest : IntegrationTestBase() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc

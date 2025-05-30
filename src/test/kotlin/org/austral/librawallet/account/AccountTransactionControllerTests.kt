@@ -7,6 +7,7 @@ import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
+import org.austral.librawallet.util.IntegrationTestBase
 import org.austral.librawallet.util.UserTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,7 +26,7 @@ import kotlin.test.assertEquals
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class AccountTransactionControllerTests {
+class AccountTransactionControllerTests : IntegrationTestBase() {
 
     @Autowired
     private lateinit var databaseInitializationService: DatabaseInitializationService
