@@ -42,6 +42,13 @@ class SecurityConfig {
                 auth.requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/debin/callback").permitAll()
                     .requestMatchers("/api/topup/callback").permitAll()
+                    // Swagger UI and OpenAPI documentation endpoints
+                    .requestMatchers("/swagger-ui.html").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/api-docs").permitAll()
+                    .requestMatchers("/api-docs/**").permitAll()
+                    .requestMatchers("/v3/api-docs").permitAll()
+                    .requestMatchers("/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2ResourceServer { oauth2 ->
