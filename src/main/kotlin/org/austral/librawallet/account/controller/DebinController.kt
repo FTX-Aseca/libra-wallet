@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.parameters.RequestBody as OpenApiRequestBody
 
 /**
  * Controller to simulate DEBIN operations.
@@ -55,7 +56,7 @@ class DebinController(
     )
     @SecurityRequirement(name = "bearerAuth")
     fun requestDebin(
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        @OpenApiRequestBody(
             description = "DEBIN request details",
             required = true,
             content = [Content(schema = Schema(implementation = DebinRequestDto::class))],
@@ -87,7 +88,7 @@ class DebinController(
         ],
     )
     fun callback(
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        @OpenApiRequestBody(
             description = "DEBIN callback request",
             required = true,
             content = [Content(schema = Schema(implementation = DebinCallbackRequest::class))],

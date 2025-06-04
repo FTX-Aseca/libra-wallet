@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.parameters.RequestBody as OpenApiRequestBody
 
 /**
  * Controller to manage transactions for specific accounts.
@@ -95,7 +96,7 @@ class AccountTransactionController(
     fun createTransaction(
         @Parameter(description = "Account ID", required = true)
         @PathVariable accountId: Long,
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        @OpenApiRequestBody(
             description = "Transaction request details",
             required = true,
             content = [Content(schema = Schema(implementation = TransactionRequest::class))],

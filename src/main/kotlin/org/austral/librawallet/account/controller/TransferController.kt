@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.parameters.RequestBody as OpenApiRequestBody
 
 /**
  * Controller to handle peer-to-peer money transfers.
@@ -57,7 +58,7 @@ class TransferController(
         ],
     )
     fun transfer(
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        @OpenApiRequestBody(
             description = "Transfer request details",
             required = true,
             content = [Content(schema = Schema(implementation = TransferRequest::class))],
