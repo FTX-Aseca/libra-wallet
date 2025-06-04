@@ -11,6 +11,11 @@ plugins {
 group = 'org.austral'
 version = '2.0.0-dev.1'
 
+// Generate build-info.properties for BuildProperties bean
+springBoot {
+    buildInfo()
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -31,6 +36,8 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'com.auth0:java-jwt:4.2.1'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.8'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
