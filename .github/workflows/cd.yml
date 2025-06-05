@@ -21,6 +21,7 @@ jobs:
             pull-requests: write  # for creating PRs if needed
             packages: write       # for pushing to GHCR
             issues: write         # for semantic-release to create issues (if configured)
+            id-token: write
 
         steps:
             - name: Checkout code (full history)
