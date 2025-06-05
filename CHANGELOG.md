@@ -1,3 +1,10 @@
+# [2.0.0-dev.4](https://github.com/FTX-Aseca/libra-wallet/compare/v2.0.0-dev.3...v2.0.0-dev.4) (2025-06-05)
+
+
+### Bug Fixes
+
+* **CD:** Fixes on CD workflow ([0f81c1d](https://github.com/FTX-Aseca/libra-wallet/commit/0f81c1df7abb75fc008bf39951d7e44a0439f8a7))
+
 # [2.0.0-dev.3](https://github.com/FTX-Aseca/libra-wallet/compare/v2.0.0-dev.2...v2.0.0-dev.3) (2025-06-05)
 
 
