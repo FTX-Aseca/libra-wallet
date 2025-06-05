@@ -1,3 +1,10 @@
+# [2.0.0-dev.2](https://github.com/FTX-Aseca/libra-wallet/compare/v2.0.0-dev.1...v2.0.0-dev.2) (2025-06-05)
+
+
+### Features
+
+* **testing:** Add DirtiesContext annotation ([6b60685](https://github.com/FTX-Aseca/libra-wallet/commit/6b60685d3c19877053b5eb2698ee88c22359e252))
+
 # [2.0.0-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0...v2.0.0-dev.1) (2025-05-28)
 
 
