@@ -1,4 +1,6 @@
+
 # [2.0.0-dev.4](https://github.com/FTX-Aseca/libra-wallet/compare/v2.0.0-dev.3...v2.0.0-dev.4) (2025-06-05)
+# [2.0.0](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0...v2.0.0) (2025-05-29)
 
 
 ### Bug Fixes
@@ -21,6 +23,21 @@
 ### Features
 
 * **testing:** Add DirtiesContext annotation ([6b60685](https://github.com/FTX-Aseca/libra-wallet/commit/6b60685d3c19877053b5eb2698ee88c22359e252))
+* **CD:** Updated CD workflow to trigger on published releases ([a71cc99](https://github.com/FTX-Aseca/libra-wallet/commit/a71cc99d5c8e82da770ba8fea879ad079ac1f9e7))
+
+
+### Features
+
+* **account:** add account details endpoint ([278a946](https://github.com/FTX-Aseca/libra-wallet/commit/278a946daf51e7b65cef1e7094657db47dffe14d))
+* **Docker:** Added Docker Compose ([4b0276d](https://github.com/FTX-Aseca/libra-wallet/commit/4b0276d1d884b6c5580d88c517189e069dd84715))
+
+
+### BREAKING CHANGES
+
+* **CD:** none
+Fixes: none
+* **Docker:** Now can use Docker Compose
+Fixes: none
 
 # [2.0.0-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0...v2.0.0-dev.1) (2025-05-28)
 
