@@ -17,10 +17,10 @@ jobs:
         name: Build, Push Docker Image & Semantic Release
         runs-on: ubuntu-latest
         permissions:
-            contents: write       # for tagging, pushing commits, etc.
-            pull-requests: write  # for creating PRs if needed
-            packages: write       # for pushing to GHCR
-            issues: write         # for semantic-release to create issues (if configured)
+            contents: write
+            pull-requests: write
+            packages: write
+            issues: write
             id-token: write
 
         steps:
@@ -29,8 +29,6 @@ jobs:
               with:
                   fetch-depth: 0
 
-            # ——————————————————————————————————————————————
-            # 1. Log in to GitHub Container Registry and build/push branch‐tagged image
             - name: Log in to GitHub Container Registry
               uses: docker/login-action@v3
               with:
@@ -50,16 +48,12 @@ jobs:
                   tags: |
                       ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
 
-            # ——————————————————————————————————————————————
-            # 2. Set up Java (if you rely on any Gradle/Java steps during release)
             - name: Set up JDK 21
               uses: actions/setup-java@v3
               with:
                   distribution: temurin
                   java-version: '21'
 
-            # ——————————————————————————————————————————————
-            # 3. Set up Node.js & install semantic-release
             - name: Set up Node.js
               uses: actions/setup-node@v3
               with:
@@ -80,26 +74,24 @@ jobs:
                   git config --global user.name "${{ github.actor }}"
                   git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-            # ——————————————————————————————————————————————
-            # 4. Run semantic-release to create/update the GitHub Release
             - name: Run semantic-release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: npx semantic-release
 
-            # ——————————————————————————————————————————————
-            # 5. Capture the newly created tag (version) so we can push a version‐tagged image and upload it
             - name: Fetch tags & determine release tag
+              id: fetch-tags
               run: |
                   git fetch --prune --unshallow || true
                   git fetch --tags origin
-                  # Get the tag that points at HEAD
+                  # Get the tag that points at HEAD (semantic-release should have created one)
                   TAG=$(git tag --points-at HEAD)
                   echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
 
-            # ——————————————————————————————————————————————
-            # 6. Build & push Docker image again, this time tagged with the release version
+            - name: Show RELEASE_TAG
+              run: echo "Release tag is ${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
             - name: Build & push Docker image (version tag)
+              if: steps.fetch-tags.outputs.RELEASE_TAG != ''
               run: |
                   IMAGE_FULL="${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}"
                   docker build \
@@ -108,9 +100,9 @@ jobs:
                     .
                   docker push "$IMAGE_FULL:${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
 
-            # ——————————————————————————————————————————————
-            # 7. Save the version‐tagged image as a tarball
             - name: Save Docker image to tarball
+              if: steps.fetch-tags.outputs.RELEASE_TAG != ''
+              id: save-docker
               run: |
                   IMAGE_FULL="${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}"
                   IMAGE_TAG="${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
@@ -119,13 +111,12 @@ jobs:
                   docker save "$IMAGE_FULL:$IMAGE_TAG" -o "$TAR_NAME"
                   echo "TAR_PATH=$TAR_NAME" >> $GITHUB_OUTPUT
 
-            # ——————————————————————————————————————————————
             # 8. Upload the tarball as a Release asset
             - name: Upload image tarball to GitHub Release
+              if: steps.fetch-tags.outputs.RELEASE_TAG != ''
               run: |
                   TAG="${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
                   TAR_PATH="${{ steps.save-docker.outputs.TAR_PATH }}"
                   gh release upload "$TAG" "$TAR_PATH" --clobber
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
