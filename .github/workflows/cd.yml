@@ -1,122 +1,122 @@
 name: CD
 
 on:
-  release:
-    types:
-      - published
+    push:
+        branches:
+            - main
+            - dev
 
 env:
-  REGISTRY: ghcr.io
-  OWNER: ${{ github.repository_owner }}
-  IMAGE_NAME: ${{ endsWith(github.ref_name, '-dev') && 'libra-wallet-api-dev' || 'libra-wallet-api' }}
-  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    REGISTRY: ghcr.io
+    OWNER: ftx-aseca
+    IMAGE_NAME: ${{ endsWith(github.ref_name, '-dev') && 'libra-wallet-api-dev' || 'libra-wallet-api' }}
+    JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
 jobs:
-  build-and-push:
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    release:
+        name: Build, Push Docker Image & Semantic Release
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: write
+            packages: write
+            issues: write
+            id-token: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout code (full history)
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Log in to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ${{ endsWith(github.ref_name, '-dev') && 'Dockerfile.dev' || 'Dockerfile.prod' }}
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            - name: Build & push Docker image (branch tag)
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ${{ endsWith(github.ref_name, '-dev') && 'Dockerfile.dev' || 'Dockerfile.prod' }}
+                  push: true
+                  tags: |
+                      ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
 
-  release:
-    name: Create Release
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      pull-requests: write
+            - name: Set up JDK 21
+              uses: actions/setup-java@v3
+              with:
+                  distribution: temurin
+                  java-version: '21'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 'lts/*'
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: "21"
+            - name: Install semantic-release and plugins
+              run: |
+                  npm install -g semantic-release@^21.0.0 \
+                    @semantic-release/changelog@^6.0.0 \
+                    @semantic-release/commit-analyzer@^9.0.0 \
+                    @semantic-release/exec@^6.0.0 \
+                    @semantic-release/git@^10.0.0 \
+                    @semantic-release/github@^8.0.0 \
+                    @semantic-release/release-notes-generator@^10.0.0
 
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/*.kts') }}
+            - name: Set Git user for semantic-release
+              run: |
+                  git config --global user.name "${{ github.actor }}"
+                  git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-      - name: Set Version
-        id: get_version
-        run: |
-          VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}' | tr -d '\n')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+            - name: Run semantic-release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: npx semantic-release
 
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ github.ref_name == 'main' && format('Release v{0}', steps.get_version.outputs.version) || format('Dev Release v{0}-dev', steps.get_version.outputs.version) }}
-          tag_name: ${{ github.ref_name == 'main' && format('v{0}', steps.get_version.outputs.version) || format('v{0}-dev', steps.get_version.outputs.version) }}
-          draft: false
-          prerelease: ${{ github.ref_name == 'dev' }}
-          generate_release_notes: true
+            - name: Fetch tags & determine release tag
+              id: fetch-tags
+              run: |
+                  git fetch --prune --unshallow || true
+                  git fetch --tags origin
+                  # Get the tag that points at HEAD (semantic-release should have created one)
+                  TAG=$(git tag --points-at HEAD)
+                  echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
 
-      - name: Update version in build.gradle
-        if: github.ref_name == 'main'
-        run: |
-          # Calculate next version
-          NEXT_PATCH=$(( ${{ steps.get_version.outputs.patch }} + 1 ))
-          NEXT_VERSION="${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.$NEXT_PATCH-SNAPSHOT"
+            - name: Show RELEASE_TAG
+              run: echo "Release tag is ${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
+            - name: Build & push Docker image (version tag)
+              if: steps.fetch-tags.outputs.RELEASE_TAG != ''
+              run: |
+                  IMAGE_FULL="${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}"
+                  docker build \
+                    --file ${{ endsWith(github.ref_name, '-dev') && 'Dockerfile.dev' || 'Dockerfile.prod' }} \
+                    --tag "$IMAGE_FULL:${{ steps.fetch-tags.outputs.RELEASE_TAG }}" \
+                    .
+                  docker push "$IMAGE_FULL:${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
 
-          # Update version in build.gradle using sed
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS requires an empty string for -i
-            sed -i '' "s/version = '.*'/version = '$NEXT_VERSION'/" build.gradle
-          else
-            # Linux
-            sed -i "s/version = '.*'/version = '$NEXT_VERSION'/" build.gradle
-          fi
+            - name: Save Docker image to tarball
+              if: steps.fetch-tags.outputs.RELEASE_TAG != ''
+              id: save-docker
+              run: |
+                  IMAGE_FULL="${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}"
+                  IMAGE_TAG="${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
+                  TAR_NAME="image-${IMAGE_TAG}.tar"
+                  docker pull "$IMAGE_FULL:$IMAGE_TAG"
+                  docker save "$IMAGE_FULL:$IMAGE_TAG" -o "$TAR_NAME"
+                  echo "TAR_PATH=$TAR_NAME" >> $GITHUB_OUTPUT
 
-          # Verify the change
-          echo "Updated version to: $NEXT_VERSION"
-          cat build.gradle | grep "version ="
-
-      - name: Create Pull Request
-        if: github.ref_name == 'main'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: bump version to $NEXT_VERSION"
-          title: "chore: bump version to $NEXT_VERSION"
-          body: |
-            This PR was automatically created to bump the version after release v${{ steps.get_version.outputs.version }}.
-
-            Changes:
-            - Updated version in build.gradle from ${{ steps.get_version.outputs.version }} to $NEXT_VERSION
-          branch: version-bump
-          base: main
+            # 8. Upload the tarball as a Release asset
+            - name: Upload image tarball to GitHub Release
+              if: steps.fetch-tags.outputs.RELEASE_TAG != ''
+              run: |
+                  TAG="${{ steps.fetch-tags.outputs.RELEASE_TAG }}"
+                  TAR_PATH="${{ steps.save-docker.outputs.TAR_PATH }}"
+                  gh release upload "$TAG" "$TAR_PATH" --clobber
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
