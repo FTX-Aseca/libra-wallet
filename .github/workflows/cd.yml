@@ -8,7 +8,7 @@ on:
 
 env:
     REGISTRY: ghcr.io
-    OWNER: ${{ toLower(github.repository_owner) }}
+    OWNER: ftx-aseca
     IMAGE_NAME: ${{ endsWith(github.ref_name, '-dev') && 'libra-wallet-api-dev' || 'libra-wallet-api' }}
     JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
