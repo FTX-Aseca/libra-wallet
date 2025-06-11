@@ -11,4 +11,5 @@ object ErrorMessages {
     const val INVALID_CALLBACK_REQUEST = "Invalid callback request"
     const val ACCOUNT_DOES_NOT_BELONG = "Account does not belong to authenticated user"
     const val INVALID_AMOUNT = "Amount must be greater than zero"
+    const val DEBIN_REQUEST_FAILED = "Debin request failed"
 }

@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.austral.librawallet.account.dto.debin.DebinCallbackRequest
 import org.austral.librawallet.account.dto.debin.DebinRequestDto
 import org.austral.librawallet.account.dto.debin.DebinResponse
 import org.austral.librawallet.account.service.DebinService
@@ -67,35 +66,5 @@ class DebinController(
     ): ResponseEntity<DebinResponse> {
         val response = debinService.requestDebin(request, jwt.subject)
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
-    }
-
-    @PostMapping("/callback")
-    @Operation(
-        summary = "DEBIN callback",
-        description = "Handles DEBIN callback responses from external systems",
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Callback processed successfully",
-                content = [Content(schema = Schema(implementation = DebinResponse::class))],
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Invalid callback request",
-            ),
-        ],
-    )
-    fun callback(
-        @OpenApiRequestBody(
-            description = "DEBIN callback request",
-            required = true,
-            content = [Content(schema = Schema(implementation = DebinCallbackRequest::class))],
-        )
-        @RequestBody callbackRequest: DebinCallbackRequest,
-    ): ResponseEntity<DebinResponse> {
-        val response = debinService.handleCallback(callbackRequest)
-        return ResponseEntity.ok(response)
     }
 }

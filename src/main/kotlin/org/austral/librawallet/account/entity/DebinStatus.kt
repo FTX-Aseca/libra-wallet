@@ -6,4 +6,5 @@ package org.austral.librawallet.account.entity
 enum class DebinStatus {
     PENDING,
     COMPLETED,
+    FAILED,
 }

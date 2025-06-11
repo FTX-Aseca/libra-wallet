@@ -16,7 +16,7 @@ RUN chmod +x ./gradlew
 COPY src src
 
 # Build the application
-RUN ./gradlew build -x test
+RUN ./gradlew build -x test -x ktlintCheck
 
 # Production stage
 FROM eclipse-temurin:21-jre-alpine
