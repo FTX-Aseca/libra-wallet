@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.0...v2.1.1) (2025-06-11)
+
+
+### Bug Fixes
+
+* **debin:** Fix Debin ([f1017b3](https://github.com/FTX-Aseca/libra-wallet/commit/f1017b3c8a2149660e11ddde06538795c2a50ed8))
+
 ## [2.1.1-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.0...v2.1.1-dev.1) (2025-06-11)
 
 
