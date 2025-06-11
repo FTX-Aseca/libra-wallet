@@ -1,3 +1,19 @@
+# [2.1.0-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.0.0...v2.1.0-dev.1) (2025-06-11)
+
+
+### Bug Fixes
+
+* **CD:** Fixes on CD workflow ([0f81c1d](https://github.com/FTX-Aseca/libra-wallet/commit/0f81c1df7abb75fc008bf39951d7e44a0439f8a7))
+* **CD:** Fixes on CD workflow ([8a12702](https://github.com/FTX-Aseca/libra-wallet/commit/8a12702c165c608e681931a5b540007dff549b68))
+* **CD:** Fixes on CD workflow ([ab7ddba](https://github.com/FTX-Aseca/libra-wallet/commit/ab7ddba2807cb8b92a13617feb69557067a77ffb))
+* **CD:** Hardcoded owner on CD workflow ([a321986](https://github.com/FTX-Aseca/libra-wallet/commit/a32198609051f552cdf38cb6f9bfc306e5339ac3))
+* **config:** Added required env vars to application.properties ([4bff9ba](https://github.com/FTX-Aseca/libra-wallet/commit/4bff9ba8fb574660cbfdf655aef0a2776e6a3176))
+* **debin:** Fix Debin ([f1017b3](https://github.com/FTX-Aseca/libra-wallet/commit/f1017b3c8a2149660e11ddde06538795c2a50ed8))
+
+
+### Features
+
+* **testing:** Add DirtiesContext annotation ([6b60685](https://github.com/FTX-Aseca/libra-wallet/commit/6b60685d3c19877053b5eb2698ee88c22359e252))
 
 # [2.0.0-dev.4](https://github.com/FTX-Aseca/libra-wallet/compare/v2.0.0-dev.3...v2.0.0-dev.4) (2025-06-05)
 # [2.0.0](https://github.com/FTX-Aseca/libra-wallet/compare/v1.0.0...v2.0.0) (2025-05-29)
