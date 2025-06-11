@@ -26,5 +26,10 @@ class DebinRequest(
     var amount: Long,
 
     @Enumerated(EnumType.STRING)
+    var identifierType: org.austral.librawallet.account.dto.IdentifierType,
+
+    var fromIdentifier: String,
+
+    @Enumerated(EnumType.STRING)
     var status: DebinStatus,
 )

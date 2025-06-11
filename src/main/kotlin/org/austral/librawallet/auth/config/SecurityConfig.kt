@@ -40,7 +40,7 @@ class SecurityConfig {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/debin/callback").permitAll()
+                    // DEBIN callback endpoint removed
                     .requestMatchers("/api/topup/callback").permitAll()
                     // Swagger UI and OpenAPI documentation endpoints
                     .requestMatchers("/swagger-ui.html").permitAll()
