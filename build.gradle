@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'org.austral'
-version = '2.1.0-dev.1'
+version = '0.6.2'
 
 // Generate build-info.properties for BuildProperties bean
 springBoot {
