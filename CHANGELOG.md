@@ -1,3 +1,10 @@
+## [2.1.1-dev.2](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.1-dev.1...v2.1.1-dev.2) (2025-06-12)
+
+
+### Bug Fixes
+
+* **test & config:** Changed application.properties and fixed DataInitializer condition ([c302b3a](https://github.com/FTX-Aseca/libra-wallet/commit/c302b3a20c70d7b1cedb3f8f6d2b829ae23b5dfb))
+
 ## [2.1.1-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.0...v2.1.1-dev.1) (2025-06-11)
 
 
