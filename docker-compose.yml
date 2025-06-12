@@ -9,6 +9,15 @@ services:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '0.75'
+        reservations:
+          memory: 1024M
+          cpus: '0.75'
+
   server:
     build:
       context: .
@@ -17,6 +26,17 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    depends_on:
+      - db
+
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 1024M
+          cpus: '0.75'
 
 volumes:
   postgres_data:
