@@ -1,7 +1,9 @@
 package org.austral.librawallet.account
 
-import org.austral.librawallet.account.entity.DebinStatus
+import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.repository.DebinRequestRepository
+import org.austral.librawallet.account.service.DebinIntegrationService
+import org.austral.librawallet.account.service.FakeDebinIntegrationService
 import org.austral.librawallet.util.DatabaseInitializationService
 import org.austral.librawallet.util.IntegrationTestBase
 import org.austral.librawallet.util.UserTestUtils
@@ -10,19 +12,23 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
+@SpringBootTest(properties = ["spring.main.allow-bean-definition-overriding=true"])
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Import(DebinControllerIntegrationTest.TestConfig::class)
 class DebinControllerIntegrationTest : IntegrationTestBase() {
 
     @Autowired
@@ -43,14 +49,15 @@ class DebinControllerIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `AC2 DEBIN request returns 201 with order details`() {
+    fun `AC2 DEBIN request returns 200 with order details`() {
         val (_, _, token) = userTestUtils.createSetupData("user1@example.com", "Pass1!")
         val amount = 75.50
+        val identifier = "0".repeat(22)
         val requestBody = """
             {
                 "amount": $amount,
-                "identifierType": "ALIAS",
-                "fromIdentifier": "Alice"
+                "identifierType": "${IdentifierType.CVU}",
+                "fromIdentifier": "$identifier"
             }
         """.trimIndent()
 
@@ -60,8 +67,15 @@ class DebinControllerIntegrationTest : IntegrationTestBase() {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody),
         )
-            .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.status").value(DebinStatus.COMPLETED.name))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.identifier").value(identifier))
+            .andExpect(jsonPath("$.amount").isNumber)
+    }
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean("debinIntegrationServiceImpl")
+        @Primary
+        fun debinIntegrationService(): DebinIntegrationService = FakeDebinIntegrationService()
     }
 }

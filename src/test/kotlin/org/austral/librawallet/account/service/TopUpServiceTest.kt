@@ -3,7 +3,6 @@ package org.austral.librawallet.account.service
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.TopUpOrder
-import org.austral.librawallet.account.entity.TopUpStatus
 import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
@@ -33,12 +32,20 @@ class TopUpServiceTest {
     @Mock
     private lateinit var transactionRepository: TransactionRepository
 
+    @Mock
+    private lateinit var topUpIntegrationService: TopUpIntegrationService
+
     private lateinit var topUpService: TopUpService
 
     @BeforeEach
     fun setup() {
         topUpService =
-            TopUpService(accountRepository, topUpOrderRepository, transactionRepository = transactionRepository)
+            TopUpService(
+                accountRepository,
+                topUpOrderRepository,
+                transactionRepository = transactionRepository,
+                topUpIntegrationService = topUpIntegrationService,
+            )
     }
 
     @Test
@@ -49,13 +56,12 @@ class TopUpServiceTest {
         val user = User(email = "a@b.com", password = "pwd")
         val account = Account(id = 1L, user = user, balance = 0L)
         `when`(accountRepository.findByUserId(1L)).thenReturn(account)
-        val order = TopUpOrder(id = 5L, account = account, amount = cents, status = TopUpStatus.PENDING)
+        val order = TopUpOrder(id = 5L, account = account, amount = cents)
         `when`(topUpOrderRepository.save(any(TopUpOrder::class.java))).thenReturn(order)
 
-        val response = topUpService.topUp(TopUpRequest(amount), jwtId)
+        val response = topUpService.topUp(TopUpRequest(amount, "0".repeat(22)), jwtId)
 
-        assertEquals(5L, response.id)
-        assertEquals(TopUpStatus.PENDING.name, response.status)
+        assertEquals(20L, response.amount)
         verify(topUpOrderRepository).save(any())
     }
 
@@ -63,7 +69,7 @@ class TopUpServiceTest {
     fun `invalid jwt user id throws ForbiddenException`() {
         val amount = 10.0
         assertThrows(ForbiddenException::class.java) {
-            topUpService.topUp(TopUpRequest(amount), "not-a-number")
+            topUpService.topUp(TopUpRequest(amount, "0".repeat(22)), "not-a-number")
         }
     }
 
@@ -73,7 +79,7 @@ class TopUpServiceTest {
         val amount = 10.0
         `when`(accountRepository.findByUserId(2L)).thenReturn(null)
         assertThrows(NotFoundException::class.java) {
-            topUpService.topUp(TopUpRequest(amount), jwtId)
+            topUpService.topUp(TopUpRequest(amount, "0".repeat(22)), jwtId)
         }
     }
 }

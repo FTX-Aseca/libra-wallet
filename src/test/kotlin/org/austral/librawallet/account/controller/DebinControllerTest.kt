@@ -36,17 +36,16 @@ class DebinControllerTest {
 
     @Test
     @WithMockJwt(subject = "1")
-    fun `requestDebin should return 201 when successful`() {
+    fun `performing DEBIN should return 200 when successful`() {
         // Given
         val request = DebinRequestDto(
             amount = 50.0,
-            identifierType = IdentifierType.ALIAS,
-            fromIdentifier = "Alice",
+            identifierType = IdentifierType.CVU,
+            fromIdentifier = "0".repeat(22),
         )
         val response = DebinResponse(
-            id = 1L,
+            identifier = "",
             amount = 50.0,
-            status = "COMPLETED",
         )
         whenever(debinService.requestDebin(request, "1")).thenReturn(response)
 

@@ -14,6 +14,7 @@ import org.austral.librawallet.account.repository.DebinRequestRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,7 +22,7 @@ class DebinService(
     private val accountRepository: AccountRepository,
     private val debinRequestRepository: DebinRequestRepository,
     private val transactionRepository: TransactionRepository,
-    private val debinIntegrationService: DebinIntegrationService,
+    @Qualifier("debinIntegrationServiceImpl") private val debinIntegrationService: DebinIntegrationService,
 ) {
 
     fun requestDebin(request: DebinRequestDto, jwtUserId: String): DebinResponse {
@@ -61,9 +62,8 @@ class DebinService(
         )
         transactionRepository.save(tx)
         return DebinResponse(
-            id = debin.id!!,
-            amount = request.amount,
-            status = debin.status.name,
+            identifier = request.fromIdentifier,
+            amount = account.balance.toDouble(),
         )
     }
 }

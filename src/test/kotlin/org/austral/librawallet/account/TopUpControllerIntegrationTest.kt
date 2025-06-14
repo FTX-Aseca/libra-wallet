@@ -1,10 +1,13 @@
 package org.austral.librawallet.account
 
+import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.TopUpOrder
 import org.austral.librawallet.account.entity.TopUpStatus
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TopUpOrderRepository
+import org.austral.librawallet.account.service.FakeTopUpIntegrationService
+import org.austral.librawallet.account.service.TopUpIntegrationService
 import org.austral.librawallet.shared.constants.ErrorMessages
 import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
@@ -15,6 +18,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -24,11 +31,18 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
+@SpringBootTest(properties = ["spring.main.allow-bean-definition-overriding=true"])
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Import(TopUpControllerIntegrationTest.TestConfig::class)
 class TopUpControllerIntegrationTest : IntegrationTestBase() {
+    @TestConfiguration
+    class TestConfig {
+        @Bean("topUpIntegrationServiceImpl")
+        @Primary
+        fun topUpIntegrationService(): TopUpIntegrationService = FakeTopUpIntegrationService()
+    }
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -51,15 +65,20 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `AC1 top-up returns 201 with order ID and PENDING status`() {
+    fun `AC1 top-up returns 200 with order ID and PENDING status`() {
         val (user, token) = userTestUtils.createUserAndToken("user@example.com", "Pass1!")
         // ensure account exists
         accountRepository.save(
             Account(user = user, balance = 0L),
         )
         val amount = 100.00
+        val identifier = "0".repeat(22)
         val requestBody = """
-            { "amount": $amount }
+            {
+            "amount": $amount,
+            "identifierType": "${IdentifierType.CVU}",
+            "fromIdentifier": "$identifier"
+            }
         """.trimIndent()
 
         mockMvc.perform(
@@ -68,7 +87,7 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody),
         )
-            .andExpect(status().isCreated)
+            .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").isNumber)
             .andExpect(jsonPath("$.status").value("PENDING"))
     }
@@ -83,11 +102,15 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
             TopUpOrder(
                 account = account,
                 amount = formattedDoubleToCents(amount),
-                status = TopUpStatus.PENDING,
             ),
         )
+        val identifier = "0".repeat(22)
         val callbackBody = """
-            { "id": ${topUp.id} }
+            {
+            "amount": $amount,
+            "identifierType": "${IdentifierType.CVU}",
+            "fromIdentifier": "$identifier"
+            }
         """.trimIndent()
 
         mockMvc.perform(
@@ -114,23 +137,19 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
     @Test
     fun `AC3 invalid top-up callback returns 400`() {
         val (user, token) = userTestUtils.createUserAndToken("user3@example.com", "Pass3!")
-        val account = accountRepository.save(Account(user = user, balance = 0L))
+        accountRepository.save(Account(user = user, balance = 0L))
         val amount = 25.0
-        // create a pending top-up order
-        topUpOrderRepository.save(
-            TopUpOrder(
-                account = account,
-                amount = formattedDoubleToCents(amount),
-                status = TopUpStatus.PENDING,
-            ),
-        )
         val invalidId = 9999999L
         val callbackBody = """
-            { "id": $invalidId }
+            {
+                "amount": $amount,
+                "identifierType": "${IdentifierType.CVU}",
+                "fromIdentifier": "$invalidId"
+            }
         """.trimIndent()
 
         mockMvc.perform(
-            post("/api/topup/callback")
+            post("/api/topup")
                 .header("Authorization", token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(callbackBody),

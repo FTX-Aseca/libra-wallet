@@ -5,4 +5,5 @@ package org.austral.librawallet.account.dto.topup
  */
 data class TopUpRequest(
     val amount: Double,
+    val identifier: String,
 )
