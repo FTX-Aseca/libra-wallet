@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.austral.librawallet.account.dto.debin.DebinRequestDto
 import org.austral.librawallet.account.dto.debin.DebinResponse
 import org.austral.librawallet.account.service.DebinService
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
@@ -27,9 +26,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody as OpenApiRequestBod
 @RestController
 @RequestMapping("/api/debin")
 @Tag(name = "DEBIN", description = "DEBIN (Debito Inmediato) operations for direct debit transactions")
-class DebinController(
-    private val debinService: DebinService,
-) {
+class DebinController(private val debinService: DebinService) {
 
     @PostMapping("/request")
     @Operation(
@@ -39,8 +36,8 @@ class DebinController(
     @ApiResponses(
         value = [
             ApiResponse(
-                responseCode = "201",
-                description = "DEBIN request created successfully",
+                responseCode = "200",
+                description = "DEBIN request performed successfully",
                 content = [Content(schema = Schema(implementation = DebinResponse::class))],
             ),
             ApiResponse(
@@ -65,6 +62,6 @@ class DebinController(
         @AuthenticationPrincipal jwt: Jwt,
     ): ResponseEntity<DebinResponse> {
         val response = debinService.requestDebin(request, jwt.subject)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        return ResponseEntity.ok(response)
     }
 }
