@@ -64,8 +64,9 @@ class TopUpServiceTest {
             TopUpRequest(
                 amount = amount,
                 identifierType = IdentifierType.CVU,
-                fromIdentifier = "0".repeat(22)
-            ), jwtId
+                fromIdentifier = "0".repeat(22),
+            ),
+            jwtId,
         )
 
         assertEquals(20L, response.amount.toLong())
@@ -76,7 +77,7 @@ class TopUpServiceTest {
     fun `invalid jwt user id throws ForbiddenException`() {
         val amount = 10.0
         assertThrows(ForbiddenException::class.java) {
-            topUpService.topUp(TopUpRequest(amount, identifierType = IdentifierType.CVU,"0".repeat(22)), "not-a-number")
+            topUpService.topUp(TopUpRequest(amount, identifierType = IdentifierType.CVU, "0".repeat(22)), "not-a-number")
         }
     }
 
@@ -86,7 +87,7 @@ class TopUpServiceTest {
         val amount = 10.0
         `when`(accountRepository.findByUserId(2L)).thenReturn(null)
         assertThrows(NotFoundException::class.java) {
-            topUpService.topUp(TopUpRequest(amount,identifierType = IdentifierType.CVU, "0".repeat(22)), jwtId)
+            topUpService.topUp(TopUpRequest(amount, identifierType = IdentifierType.CVU, "0".repeat(22)), jwtId)
         }
     }
 }

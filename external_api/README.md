@@ -32,4 +32,13 @@ Simulate a top-up operation.
 **Response**:
 
 - `200 OK`: JSON object with fields `identifier_type`, `identifier`, `amount` echoing the request.
-- `400 Bad Request`: if any field is missing or invalid. 
+- `400 Bad Request`: if any field is missing or invalid.
+
+### Example body for any endpoint:
+```json
+{
+  "identifierType": "CVU",
+  "fromIdentifier": "9999999990000000000001",
+  "amount": 10
+}
+```
