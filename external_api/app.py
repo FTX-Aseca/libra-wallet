@@ -45,7 +45,7 @@ def topup():
     identifier = data.get("identifier")
     amount = data.get("amount")
 
-    if identifier_type not in ("alias", "cvu"):
+    if identifier_type != "cvu":
         return jsonify({"error": "identifier_type must be 'alias' or 'cvu'"}), 400
     if not identifier:
         return jsonify({"error": "identifier is required"}), 400

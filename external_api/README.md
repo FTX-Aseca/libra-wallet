@@ -37,8 +37,9 @@ Simulate a top-up operation.
 ### Example body for any endpoint:
 ```json
 {
-  "identifierType": "CVU",
-  "fromIdentifier": "9999999990000000000001",
+  "identifier_type": "cvu",
+  "identifier": "9999999990000000000001",
   "amount": 10
 }
 ```
+- Both endpoints use the CVU identifier type
