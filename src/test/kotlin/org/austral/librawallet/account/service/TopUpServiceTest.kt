@@ -32,13 +32,13 @@ class TopUpServiceTest {
     @Mock
     private lateinit var transactionRepository: TransactionRepository
 
-    @Mock
     private lateinit var topUpIntegrationService: TopUpIntegrationService
 
     private lateinit var topUpService: TopUpService
 
     @BeforeEach
     fun setup() {
+        topUpIntegrationService = FakeTopUpIntegrationService()
         topUpService =
             TopUpService(
                 accountRepository,
@@ -49,7 +49,7 @@ class TopUpServiceTest {
     }
 
     @Test
-    fun `successful top up returns PENDING order`() {
+    fun `successful top up case`() {
         val jwtId = "1"
         val amount = 20.0
         val cents = (amount * 100).toLong()
@@ -59,9 +59,9 @@ class TopUpServiceTest {
         val order = TopUpOrder(id = 5L, account = account, amount = cents)
         `when`(topUpOrderRepository.save(any(TopUpOrder::class.java))).thenReturn(order)
 
-        val response = topUpService.topUp(TopUpRequest(amount, "0".repeat(22)), jwtId)
+        val response = topUpService.topUp(TopUpRequest(amount = amount, identifier = "0".repeat(22)), jwtId)
 
-        assertEquals(20L, response.amount)
+        assertEquals(20L, response.amount.toLong())
         verify(topUpOrderRepository).save(any())
     }
 

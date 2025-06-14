@@ -18,4 +18,4 @@ interface TopUpIntegrationService {
         toIdentifier: String,
         amountInCents: Long,
     ): Boolean
-} 
+}

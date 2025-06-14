@@ -1,15 +1,11 @@
 package org.austral.librawallet.account
 
-import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.entity.Account
-import org.austral.librawallet.account.entity.TopUpOrder
-import org.austral.librawallet.account.entity.TopUpStatus
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TopUpOrderRepository
 import org.austral.librawallet.account.service.FakeTopUpIntegrationService
 import org.austral.librawallet.account.service.TopUpIntegrationService
 import org.austral.librawallet.shared.constants.ErrorMessages
-import org.austral.librawallet.shared.formatters.formattedDoubleToCents
 import org.austral.librawallet.util.DatabaseInitializationService
 import org.austral.librawallet.util.IntegrationTestBase
 import org.austral.librawallet.util.UserTestUtils
@@ -76,8 +72,7 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
         val requestBody = """
             {
             "amount": $amount,
-            "identifierType": "${IdentifierType.CVU}",
-            "fromIdentifier": "$identifier"
+            "identifier": "$identifier"
             }
         """.trimIndent()
 
@@ -88,8 +83,7 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
                 .content(requestBody),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.status").value("PENDING"))
+            .andExpect(jsonPath("$.amount").isNumber)
     }
 
     @Test
@@ -98,30 +92,28 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
         val account = accountRepository.save(Account(user = user, balance = 0L))
         val amount = 50.0
         // create a pending top-up order
-        val topUp = topUpOrderRepository.save(
-            TopUpOrder(
-                account = account,
-                amount = formattedDoubleToCents(amount),
-            ),
-        )
+//        val topUp = topUpOrderRepository.save(
+//            TopUpOrder(
+//                account = account,
+//                amount = formattedDoubleToCents(amount),
+//            ),
+//        )
         val identifier = "0".repeat(22)
         val callbackBody = """
             {
             "amount": $amount,
-            "identifierType": "${IdentifierType.CVU}",
-            "fromIdentifier": "$identifier"
+            "identifier": "$identifier"
             }
         """.trimIndent()
 
         mockMvc.perform(
-            post("/api/topup/callback")
+            post("/api/topup")
                 .header("Authorization", token)
                 .header("X-Signature", "valid-signature")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(callbackBody),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value(TopUpStatus.COMPLETED.name))
 
         // verify transaction history
         mockMvc.perform(
@@ -135,7 +127,7 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `AC3 invalid top-up callback returns 400`() {
+    fun `AC3 invalid top-up returns 400`() {
         val (user, token) = userTestUtils.createUserAndToken("user3@example.com", "Pass3!")
         accountRepository.save(Account(user = user, balance = 0L))
         val amount = 25.0
@@ -143,8 +135,7 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
         val callbackBody = """
             {
                 "amount": $amount,
-                "identifierType": "${IdentifierType.CVU}",
-                "fromIdentifier": "$invalidId"
+                "identifier": "$invalidId"
             }
         """.trimIndent()
 

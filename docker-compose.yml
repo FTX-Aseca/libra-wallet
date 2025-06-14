@@ -17,11 +17,21 @@ services:
         reservations:
           memory: 1024M
           cpus: '0.75'
+  external_api:
+      build:
+          context: ./external_api
+          dockerfile: Dockerfile
+      ports:
+          - "5001:5001"
+#      env_file:
+#          - .env
+      depends_on:
+          - db
 
   server:
     build:
       context: .
-      dockerfile: ${DOCKERFILE:-Dockerfile.dev}
+      dockerfile: ${DOCKERFILE:-Dockerfile.prod} # Debug purposes
     ports:
       - "8080:8080"
     env_file:

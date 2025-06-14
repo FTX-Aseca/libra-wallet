@@ -43,8 +43,8 @@ class TopUpService(
         if (!success) throw BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST)
 
         val response = TopUpResponse(
-            identifier = account.cvu,
-            amount = account.balance.toDouble(),
+            identifier = request.identifier,
+            amount = request.amount.toDouble(),
         )
 
         topUpOrderRepository.save(

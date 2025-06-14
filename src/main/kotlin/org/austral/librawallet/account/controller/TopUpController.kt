@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.dto.topup.TopUpResponse
 import org.austral.librawallet.account.service.TopUpService
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
@@ -63,6 +62,6 @@ class TopUpController(private val topUpService: TopUpService) {
         @AuthenticationPrincipal jwt: Jwt,
     ): ResponseEntity<TopUpResponse> {
         val response = topUpService.topUp(request, jwt.subject)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        return ResponseEntity.ok(response)
     }
 }
