@@ -1,6 +1,7 @@
 package org.austral.librawallet.account.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.dto.topup.TopUpResponse
 import org.austral.librawallet.account.exceptions.BadRequestException
@@ -40,6 +41,7 @@ class TopUpControllerTest {
         // Given
         val request = TopUpRequest(
             amount = 100.0,
+            identifierType = IdentifierType.CVU,
             identifier,
         )
 
@@ -65,7 +67,8 @@ class TopUpControllerTest {
         // Given
         val request = TopUpRequest(
             amount = -100.0,
-            identifier = "0".repeat(22),
+            identifierType = IdentifierType.CVU,
+            fromIdentifier = "0".repeat(22),
         )
 
         whenever(topUpService.topUp(request, "1")).thenThrow(BadRequestException(ErrorMessages.INVALID_AMOUNT))
@@ -85,7 +88,8 @@ class TopUpControllerTest {
         // Given
         val request = TopUpRequest(
             amount = 100.0,
-            identifier = "0".repeat(22),
+            identifierType = IdentifierType.CVU,
+            fromIdentifier = "0".repeat(22),
         )
 
         // When/Then

@@ -37,13 +37,13 @@ class TopUpService(
         val amountInCents = formattedDoubleToCents(request.amount)
         val success = topUpIntegrationService.performTopUp(
             IdentifierType.CVU,
-            request.identifier,
+            request.fromIdentifier,
             request.amount.toLong(),
         )
         if (!success) throw BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST)
 
         val response = TopUpResponse(
-            identifier = request.identifier,
+            identifier = request.fromIdentifier,
             amount = request.amount.toDouble(),
         )
 

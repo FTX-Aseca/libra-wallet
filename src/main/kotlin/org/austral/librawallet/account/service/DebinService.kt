@@ -33,14 +33,17 @@ class DebinService(
             ?: throw ForbiddenException(ErrorMessages.INVALID_USER_ID_FORMAT)
         val account = accountRepository.findByUserId(userIdLong)
             ?: throw NotFoundException(ErrorMessages.ACCOUNT_NOT_FOUND)
-        val amountInCents = formattedDoubleToCents(request.amount)
+        val amountInCents = formattedDoubleToCents(request.amount.toDouble())
+
+        println("Used integration service: ${debinIntegrationService.javaClass}")
+
         val success = debinIntegrationService.performDebin(
             request.identifierType,
             request.fromIdentifier,
             amountInCents,
         )
         val status = if (success) DebinStatus.COMPLETED else DebinStatus.FAILED
-        val debin = debinRequestRepository.save(
+        debinRequestRepository.save(
             DebinRequest(
                 account = account,
                 amount = amountInCents,
@@ -63,7 +66,7 @@ class DebinService(
         transactionRepository.save(tx)
         return DebinResponse(
             identifier = request.fromIdentifier,
-            amount = account.balance.toDouble(),
+            amount = formattedDoubleToCents(account.balance.toDouble()).toDouble(),
         )
     }
 }

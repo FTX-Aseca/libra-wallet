@@ -7,19 +7,19 @@ import org.springframework.stereotype.Service
 class FakeTopUpIntegrationService : TopUpIntegrationService {
     override fun performTopUp(
         identifierType: IdentifierType,
-        fromIdentifier: String,
+        toIdentifier: String,
         amountInCents: Long,
     ): Boolean {
         return when (identifierType) {
             IdentifierType.ALIAS -> {
-                fromIdentifier.firstOrNull()
+                toIdentifier.firstOrNull()
                     ?.uppercaseChar()
                     ?.let { it in 'A'..'L' }
                     ?: false
             }
 
             IdentifierType.CVU -> {
-                fromIdentifier.firstOrNull()
+                toIdentifier.firstOrNull()
                     ?.let { it in '0'..'4' }
                     ?: false
             }

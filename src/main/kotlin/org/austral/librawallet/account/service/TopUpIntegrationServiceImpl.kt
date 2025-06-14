@@ -1,6 +1,7 @@
 package org.austral.librawallet.account.service
 
 import org.austral.librawallet.account.dto.IdentifierType
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -11,9 +12,10 @@ import org.springframework.web.client.RestTemplate
  * Implementation of TopUpIntegrationService that calls the external fake API.
  */
 @Service
-class TopUpIntegrationServiceImpl : TopUpIntegrationService {
+class TopUpIntegrationServiceImpl(
+    @Value("\${external.api.base-url}") private val baseUrl: String,
+) : TopUpIntegrationService {
     private val restTemplate = RestTemplate()
-    private val baseUrl = "http://localhost:5000"
 
     override fun performTopUp(
         identifierType: IdentifierType,
@@ -32,7 +34,7 @@ class TopUpIntegrationServiceImpl : TopUpIntegrationService {
                 Map::class.java,
             )
             response.statusCode == HttpStatus.OK
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

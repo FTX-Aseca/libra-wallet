@@ -1,5 +1,6 @@
 package org.austral.librawallet.account.service
 
+import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.TopUpOrder
@@ -59,7 +60,13 @@ class TopUpServiceTest {
         val order = TopUpOrder(id = 5L, account = account, amount = cents)
         `when`(topUpOrderRepository.save(any(TopUpOrder::class.java))).thenReturn(order)
 
-        val response = topUpService.topUp(TopUpRequest(amount = amount, identifier = "0".repeat(22)), jwtId)
+        val response = topUpService.topUp(
+            TopUpRequest(
+                amount = amount,
+                identifierType = IdentifierType.CVU,
+                fromIdentifier = "0".repeat(22)
+            ), jwtId
+        )
 
         assertEquals(20L, response.amount.toLong())
         verify(topUpOrderRepository).save(any())
@@ -69,7 +76,7 @@ class TopUpServiceTest {
     fun `invalid jwt user id throws ForbiddenException`() {
         val amount = 10.0
         assertThrows(ForbiddenException::class.java) {
-            topUpService.topUp(TopUpRequest(amount, "0".repeat(22)), "not-a-number")
+            topUpService.topUp(TopUpRequest(amount, identifierType = IdentifierType.CVU,"0".repeat(22)), "not-a-number")
         }
     }
 
@@ -79,7 +86,7 @@ class TopUpServiceTest {
         val amount = 10.0
         `when`(accountRepository.findByUserId(2L)).thenReturn(null)
         assertThrows(NotFoundException::class.java) {
-            topUpService.topUp(TopUpRequest(amount, "0".repeat(22)), jwtId)
+            topUpService.topUp(TopUpRequest(amount,identifierType = IdentifierType.CVU, "0".repeat(22)), jwtId)
         }
     }
 }

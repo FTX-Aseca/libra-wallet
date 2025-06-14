@@ -24,11 +24,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest(properties = ["spring.main.allow-bean-definition-overriding=true"])
+@SpringBootTest(properties = [
+    "spring.main.allow-bean-definition-overriding=true",
+    "external.api.base-url=http://external_api:5001"
+])
+@Import(DebinControllerIntegrationTest.TestConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Import(DebinControllerIntegrationTest.TestConfig::class)
 class DebinControllerIntegrationTest : IntegrationTestBase() {
 
     @Autowired

@@ -32,12 +32,10 @@ def debin():
         return jsonify({"error": "Insufficient balance"}), 400
     # Perform debit
     accounts[identifier] -= amount
-    
+
     return jsonify({
-        # "identifier_type": identifier_type,
-        # "identifier": identifier,
-        # "amount": amount,
-        # "balance": accounts[identifier]
+        "identifier": identifier,
+        "amount": amount,
     }), 200
 
 @app.route("/api/topup", methods=["POST"])
@@ -63,12 +61,10 @@ def topup():
     # Perform top-up
     accounts[identifier] += amount
     return jsonify({
-        # "identifier_type": identifier_type,
-        # "identifier": identifier,
-        # "amount": amount,
-        # "balance": accounts[identifier]
+        "identifier": identifier,
+        "amount": amount,
     }), 200
 
 if __name__ == "__main__":
     # Run the Flask development server
-    app.run(debug=True, host="0.0.0.0", port=5000) 
+    app.run(debug=True, host="0.0.0.0", port=5001)

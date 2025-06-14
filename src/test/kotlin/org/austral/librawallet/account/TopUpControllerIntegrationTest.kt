@@ -1,5 +1,6 @@
 package org.austral.librawallet.account
 
+import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TopUpOrderRepository
@@ -27,11 +28,16 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest(properties = ["spring.main.allow-bean-definition-overriding=true"])
+@SpringBootTest(
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true",
+        "external.api.base-url=http://external_api:5001"
+    ]
+)
+@Import(TopUpControllerIntegrationTest.TestConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Import(TopUpControllerIntegrationTest.TestConfig::class)
 class TopUpControllerIntegrationTest : IntegrationTestBase() {
     @TestConfiguration
     class TestConfig {
@@ -69,10 +75,12 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
         )
         val amount = 100.00
         val identifier = "0".repeat(22)
+        val identifierType = IdentifierType.CVU
         val requestBody = """
             {
             "amount": $amount,
-            "identifier": "$identifier"
+            "fromIdentifier": "$identifier",
+            "identifierType": "${identifierType.name}"
             }
         """.trimIndent()
 
@@ -89,7 +97,7 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
     @Test
     fun `AC2 top-up callback valid transitions to COMPLETED and credits user`() {
         val (user, token) = userTestUtils.createUserAndToken("user2@example.com", "Pass2!")
-        val account = accountRepository.save(Account(user = user, balance = 0L))
+        accountRepository.save(Account(user = user, balance = 0L))
         val amount = 50.0
         // create a pending top-up order
 //        val topUp = topUpOrderRepository.save(
@@ -99,10 +107,12 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
 //            ),
 //        )
         val identifier = "0".repeat(22)
+        val identifierType = IdentifierType.CVU
         val callbackBody = """
             {
             "amount": $amount,
-            "identifier": "$identifier"
+            "fromIdentifier": "$identifier",
+            "identifierType": "${identifierType.name}"
             }
         """.trimIndent()
 
@@ -132,10 +142,12 @@ class TopUpControllerIntegrationTest : IntegrationTestBase() {
         accountRepository.save(Account(user = user, balance = 0L))
         val amount = 25.0
         val invalidId = 9999999L
+        val identifierType = IdentifierType.CVU
         val callbackBody = """
             {
                 "amount": $amount,
-                "identifier": "$invalidId"
+                "fromIdentifier": "$invalidId",
+                "identifierType": "${identifierType.name}"
             }
         """.trimIndent()
 

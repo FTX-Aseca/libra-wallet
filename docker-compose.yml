@@ -17,16 +17,18 @@ services:
         reservations:
           memory: 1024M
           cpus: '0.75'
+  
   external_api:
-      build:
-          context: ./external_api
-          dockerfile: Dockerfile
-      ports:
-          - "5001:5001"
-#      env_file:
-#          - .env
-      depends_on:
-          - db
+    container_name: external_api
+    build:
+      context: ./external_api
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+#    env_file:
+#      - .env
+    depends_on:
+      - db
 
   server:
     build:
@@ -36,8 +38,11 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      - EXTERNAL_API_BASE_URL=http://external_api:5001
     depends_on:
       - db
+      - external_api
 
     deploy:
       resources:

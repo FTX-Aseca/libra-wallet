@@ -1,6 +1,7 @@
 package org.austral.librawallet.account.service
 
 import org.austral.librawallet.account.dto.IdentifierType
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -11,15 +12,17 @@ import org.springframework.web.client.RestTemplate
  * Implementation of DebinIntegrationService that calls the external fake API.
  */
 @Service
-class DebinIntegrationServiceImpl : DebinIntegrationService {
+class DebinIntegrationServiceImpl(
+    @Value("\${external.api.base-url}") private val baseUrl: String,
+) : DebinIntegrationService {
     private val restTemplate = RestTemplate()
-    private val baseUrl = "http://localhost:5000" // TODO: move this as an env var
 
     override fun performDebin(
         identifierType: IdentifierType,
         fromIdentifier: String,
         amountInCents: Long,
     ): Boolean {
+        println("Calling external service")
         val payload = mapOf(
             "identifier_type" to identifierType.name.lowercase(),
             "identifier" to fromIdentifier,
@@ -31,6 +34,7 @@ class DebinIntegrationServiceImpl : DebinIntegrationService {
                 HttpEntity(payload),
                 Map::class.java,
             )
+            println("External Server response: $response")
             response.statusCode == HttpStatus.OK
         } catch (_: Exception) {
             false
