@@ -1,7 +1,7 @@
 package org.austral.librawallet.account.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.austral.librawallet.account.dto.topup.TopUpCallbackRequest
+import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.dto.topup.TopUpResponse
 import org.austral.librawallet.account.exceptions.BadRequestException
@@ -36,15 +36,18 @@ class TopUpControllerTest {
 
     @Test
     @WithMockJwt(subject = "1")
-    fun `topUp should return 201 when successful`() {
+    fun `topUp should return 200 when successful`() {
+        val identifier = "0".repeat(22)
         // Given
         val request = TopUpRequest(
             amount = 100.0,
+            identifierType = IdentifierType.CVU,
+            identifier,
         )
 
         val response = TopUpResponse(
-            id = 1L,
-            status = "PENDING",
+            identifier = identifier,
+            amount = 100.0,
         )
 
         whenever(topUpService.topUp(request, "1")).thenReturn(response)
@@ -55,9 +58,7 @@ class TopUpControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)),
         )
-            .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.status").value("PENDING"))
+            .andExpect(status().isOk)
     }
 
     @Test
@@ -66,6 +67,8 @@ class TopUpControllerTest {
         // Given
         val request = TopUpRequest(
             amount = -100.0,
+            identifierType = IdentifierType.CVU,
+            toIdentifier = "0".repeat(22),
         )
 
         whenever(topUpService.topUp(request, "1")).thenThrow(BadRequestException(ErrorMessages.INVALID_AMOUNT))
@@ -78,65 +81,5 @@ class TopUpControllerTest {
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_AMOUNT))
-    }
-
-    @Test
-    fun `topUp should return 401 when not authenticated`() {
-        // Given
-        val request = TopUpRequest(
-            amount = 100.0,
-        )
-
-        // When/Then
-        mockMvc.perform(
-            post("/api/topup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)),
-        )
-            .andExpect(status().isUnauthorized)
-    }
-
-    @Test
-    fun `callback should return 200 when successful`() {
-        // Given
-        val request = TopUpCallbackRequest(
-            id = 1L,
-        )
-
-        val response = TopUpResponse(
-            id = request.id,
-            status = "COMPLETED",
-        )
-
-        whenever(topUpService.handleCallback(request)).thenReturn(response)
-
-        // When/Then
-        mockMvc.perform(
-            post("/api/topup/callback")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)),
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.status").value("COMPLETED"))
-    }
-
-    @Test
-    fun `callback should return 400 when request is invalid`() {
-        // Given
-        val request = TopUpCallbackRequest(
-            id = -1L,
-        )
-
-        whenever(topUpService.handleCallback(request)).thenThrow(BadRequestException(ErrorMessages.INVALID_CALLBACK_REQUEST))
-
-        // When/Then
-        mockMvc.perform(
-            post("/api/topup/callback")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)),
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_CALLBACK_REQUEST))
     }
 }

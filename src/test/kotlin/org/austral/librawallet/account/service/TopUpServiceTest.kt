@@ -1,10 +1,9 @@
 package org.austral.librawallet.account.service
 
+import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.TopUpOrder
-import org.austral.librawallet.account.entity.TopUpStatus
-import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TopUpOrderRepository
@@ -37,43 +36,51 @@ class TopUpServiceTest {
 
     @BeforeEach
     fun setup() {
-        topUpService =
-            TopUpService(accountRepository, topUpOrderRepository, transactionRepository = transactionRepository)
+        topUpService = TopUpService(
+            accountRepository,
+            topUpOrderRepository,
+            transactionRepository,
+        )
     }
 
     @Test
-    fun `successful top up returns PENDING order`() {
+    fun `successful top up case`() {
         val jwtId = "1"
         val amount = 20.0
         val cents = (amount * 100).toLong()
         val user = User(email = "a@b.com", password = "pwd")
         val account = Account(id = 1L, user = user, balance = 0L)
-        `when`(accountRepository.findByUserId(1L)).thenReturn(account)
-        val order = TopUpOrder(id = 5L, account = account, amount = cents, status = TopUpStatus.PENDING)
+        `when`(accountRepository.findByCvu("0".repeat(22))).thenReturn(account)
+        val order = TopUpOrder(id = 5L, account = account, amount = cents)
         `when`(topUpOrderRepository.save(any(TopUpOrder::class.java))).thenReturn(order)
 
-        val response = topUpService.topUp(TopUpRequest(amount), jwtId)
+        val response = topUpService.topUp(
+            TopUpRequest(
+                amount = amount,
+                identifierType = IdentifierType.CVU,
+                toIdentifier = "0".repeat(22),
+            ),
+            jwtId,
+        )
 
-        assertEquals(5L, response.id)
-        assertEquals(TopUpStatus.PENDING.name, response.status)
+        assertEquals(20L, response.amount.toLong())
         verify(topUpOrderRepository).save(any())
-    }
-
-    @Test
-    fun `invalid jwt user id throws ForbiddenException`() {
-        val amount = 10.0
-        assertThrows(ForbiddenException::class.java) {
-            topUpService.topUp(TopUpRequest(amount), "not-a-number")
-        }
     }
 
     @Test
     fun `no account found throws NotFoundException`() {
         val jwtId = "2"
         val amount = 10.0
-        `when`(accountRepository.findByUserId(2L)).thenReturn(null)
+        `when`(accountRepository.findByCvu("0".repeat(22))).thenReturn(null)
         assertThrows(NotFoundException::class.java) {
-            topUpService.topUp(TopUpRequest(amount), jwtId)
+            topUpService.topUp(
+                TopUpRequest(
+                    amount = amount,
+                    identifierType = IdentifierType.CVU,
+                    toIdentifier = "0".repeat(22),
+                ),
+                jwtId,
+            )
         }
     }
 }

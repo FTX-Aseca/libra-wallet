@@ -8,11 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.austral.librawallet.account.dto.topup.TopUpCallbackRequest
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.dto.topup.TopUpResponse
 import org.austral.librawallet.account.service.TopUpService
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
@@ -28,9 +26,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody as OpenApiRequestBod
 @RestController
 @RequestMapping("/api/topup")
 @Tag(name = "Top-up", description = "Account top-up operations from external sources")
-class TopUpController(
-    private val topUpService: TopUpService,
-) {
+class TopUpController(private val topUpService: TopUpService) {
 
     @PostMapping
     @Operation(
@@ -66,36 +62,6 @@ class TopUpController(
         @AuthenticationPrincipal jwt: Jwt,
     ): ResponseEntity<TopUpResponse> {
         val response = topUpService.topUp(request, jwt.subject)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
-    }
-
-    @PostMapping("/callback")
-    @Operation(
-        summary = "Top-up callback",
-        description = "Handles top-up callback responses from external payment systems",
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Callback processed successfully",
-                content = [Content(schema = Schema(implementation = TopUpResponse::class))],
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Invalid callback request",
-            ),
-        ],
-    )
-    fun callback(
-        @OpenApiRequestBody(
-            description = "Top-up callback request",
-            required = true,
-            content = [Content(schema = Schema(implementation = TopUpCallbackRequest::class))],
-        )
-        @RequestBody request: TopUpCallbackRequest,
-    ): ResponseEntity<TopUpResponse> {
-        val response = topUpService.handleCallback(request)
         return ResponseEntity.ok(response)
     }
 }
