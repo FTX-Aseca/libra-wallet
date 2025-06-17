@@ -4,7 +4,6 @@ import org.austral.librawallet.account.dto.IdentifierType
 import org.austral.librawallet.account.dto.topup.TopUpRequest
 import org.austral.librawallet.account.entity.Account
 import org.austral.librawallet.account.entity.TopUpOrder
-import org.austral.librawallet.account.exceptions.ForbiddenException
 import org.austral.librawallet.account.exceptions.NotFoundException
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TopUpOrderRepository
