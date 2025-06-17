@@ -1,4 +1,5 @@
 # [3.0.0-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.1-dev.2...v3.0.0-dev.1) (2025-06-17)
+## [2.1.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.0...v2.1.1) (2025-06-11)
 
 
 ### Bug Fixes
@@ -23,6 +24,7 @@
 ### Bug Fixes
 
 * **test & config:** Changed application.properties and fixed DataInitializer condition ([c302b3a](https://github.com/FTX-Aseca/libra-wallet/commit/c302b3a20c70d7b1cedb3f8f6d2b829ae23b5dfb))
+* **debin:** Fix Debin ([f1017b3](https://github.com/FTX-Aseca/libra-wallet/commit/f1017b3c8a2149660e11ddde06538795c2a50ed8))
 
 ## [2.1.1-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.0...v2.1.1-dev.1) (2025-06-11)
 
