@@ -1,3 +1,22 @@
+# [3.0.0-dev.1](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.1-dev.2...v3.0.0-dev.1) (2025-06-17)
+
+
+### Bug Fixes
+
+* **test:** Delete unused import ([7d7363b](https://github.com/FTX-Aseca/libra-wallet/commit/7d7363b5a19e20d0180234ef057c677bca956f05))
+* **topup:** Change Top-up to use internal behaviour only ([581936c](https://github.com/FTX-Aseca/libra-wallet/commit/581936c5a8a16b12554695d3864ef353e3f659b6))
+
+
+### Features
+
+* **external API:** Finished implementing external API ([4e86644](https://github.com/FTX-Aseca/libra-wallet/commit/4e86644994ed05f91e74e4bb40d09f2379d6d9ba))
+* **external services:** Started implementing fake external API ([842ee74](https://github.com/FTX-Aseca/libra-wallet/commit/842ee744481b7546bdb845912566a04d4ef88252))
+
+
+### BREAKING CHANGES
+
+* **external API:** removed /api/topup/callback endpoint, changed /api/topup and /api/debin/request bodies
+
 ## [2.1.1-dev.2](https://github.com/FTX-Aseca/libra-wallet/compare/v2.1.1-dev.1...v2.1.1-dev.2) (2025-06-12)
 
 
