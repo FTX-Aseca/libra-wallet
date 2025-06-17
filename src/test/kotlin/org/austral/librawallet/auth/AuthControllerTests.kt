@@ -1,7 +1,6 @@
 package org.austral.librawallet.auth
 
 import org.austral.librawallet.account.DebinControllerIntegrationTest
-import org.austral.librawallet.account.TopUpControllerIntegrationTest
 import org.austral.librawallet.account.repository.AccountRepository
 import org.austral.librawallet.account.repository.TransactionRepository
 import org.austral.librawallet.auth.repository.UserRepository
@@ -26,7 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest(properties = ["spring.main.allow-bean-definition-overriding=true"])
-@Import(TopUpControllerIntegrationTest.TestConfig::class, DebinControllerIntegrationTest.TestConfig::class)
+@Import(DebinControllerIntegrationTest.TestConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)

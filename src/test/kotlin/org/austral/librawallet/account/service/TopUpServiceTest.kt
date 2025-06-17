@@ -33,20 +33,15 @@ class TopUpServiceTest {
     @Mock
     private lateinit var transactionRepository: TransactionRepository
 
-    private lateinit var topUpIntegrationService: TopUpIntegrationService
-
     private lateinit var topUpService: TopUpService
 
     @BeforeEach
     fun setup() {
-        topUpIntegrationService = FakeTopUpIntegrationService()
-        topUpService =
-            TopUpService(
-                accountRepository,
-                topUpOrderRepository,
-                transactionRepository = transactionRepository,
-                topUpIntegrationService = topUpIntegrationService,
-            )
+        topUpService = TopUpService(
+            accountRepository,
+            topUpOrderRepository,
+            transactionRepository,
+        )
     }
 
     @Test
@@ -56,7 +51,7 @@ class TopUpServiceTest {
         val cents = (amount * 100).toLong()
         val user = User(email = "a@b.com", password = "pwd")
         val account = Account(id = 1L, user = user, balance = 0L)
-        `when`(accountRepository.findByUserId(1L)).thenReturn(account)
+        `when`(accountRepository.findByCvu("0".repeat(22))).thenReturn(account)
         val order = TopUpOrder(id = 5L, account = account, amount = cents)
         `when`(topUpOrderRepository.save(any(TopUpOrder::class.java))).thenReturn(order)
 
@@ -64,7 +59,7 @@ class TopUpServiceTest {
             TopUpRequest(
                 amount = amount,
                 identifierType = IdentifierType.CVU,
-                fromIdentifier = "0".repeat(22),
+                toIdentifier = "0".repeat(22),
             ),
             jwtId,
         )
@@ -74,20 +69,19 @@ class TopUpServiceTest {
     }
 
     @Test
-    fun `invalid jwt user id throws ForbiddenException`() {
-        val amount = 10.0
-        assertThrows(ForbiddenException::class.java) {
-            topUpService.topUp(TopUpRequest(amount, identifierType = IdentifierType.CVU, "0".repeat(22)), "not-a-number")
-        }
-    }
-
-    @Test
     fun `no account found throws NotFoundException`() {
         val jwtId = "2"
         val amount = 10.0
-        `when`(accountRepository.findByUserId(2L)).thenReturn(null)
+        `when`(accountRepository.findByCvu("0".repeat(22))).thenReturn(null)
         assertThrows(NotFoundException::class.java) {
-            topUpService.topUp(TopUpRequest(amount, identifierType = IdentifierType.CVU, "0".repeat(22)), jwtId)
+            topUpService.topUp(
+                TopUpRequest(
+                    amount = amount,
+                    identifierType = IdentifierType.CVU,
+                    toIdentifier = "0".repeat(22),
+                ),
+                jwtId,
+            )
         }
     }
 }

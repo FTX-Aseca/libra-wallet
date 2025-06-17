@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import kotlin.test.assertEquals
 
 @SpringBootTest(properties = ["spring.main.allow-bean-definition-overriding=true"])
-@Import(TopUpControllerIntegrationTest.TestConfig::class, DebinControllerIntegrationTest.TestConfig::class)
+@Import(DebinControllerIntegrationTest.TestConfig::class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)

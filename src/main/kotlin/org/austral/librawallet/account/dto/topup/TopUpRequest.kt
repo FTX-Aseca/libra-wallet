@@ -8,5 +8,5 @@ import org.austral.librawallet.account.dto.IdentifierType
 data class TopUpRequest(
     val amount: Double,
     val identifierType: IdentifierType,
-    val fromIdentifier: String,
+    val toIdentifier: String,
 )

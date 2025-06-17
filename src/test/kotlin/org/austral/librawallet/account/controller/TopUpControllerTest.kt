@@ -68,7 +68,7 @@ class TopUpControllerTest {
         val request = TopUpRequest(
             amount = -100.0,
             identifierType = IdentifierType.CVU,
-            fromIdentifier = "0".repeat(22),
+            toIdentifier = "0".repeat(22),
         )
 
         whenever(topUpService.topUp(request, "1")).thenThrow(BadRequestException(ErrorMessages.INVALID_AMOUNT))
@@ -81,23 +81,5 @@ class TopUpControllerTest {
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value(ErrorMessages.INVALID_AMOUNT))
-    }
-
-    @Test
-    fun `topUp should return 401 when not authenticated`() {
-        // Given
-        val request = TopUpRequest(
-            amount = 100.0,
-            identifierType = IdentifierType.CVU,
-            fromIdentifier = "0".repeat(22),
-        )
-
-        // When/Then
-        mockMvc.perform(
-            post("/api/topup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)),
-        )
-            .andExpect(status().isUnauthorized)
     }
 }
